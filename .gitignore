@@ -6,11 +6,6 @@ debug*.log
 settings.local.json
 *.local.json
 
-# Claude Code local directories
-.claude/
-# But allow project slash commands to be tracked
-!.claude/commands/
-
 # Plugin metadata (keep root marketplace.json but ignore nested ones)
 # The root .claude-plugin/marketplace.json should be tracked
 # Individual plugin .claude-plugin/plugin.json files should be tracked
