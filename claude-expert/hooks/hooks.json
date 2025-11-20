@@ -1,0 +1,16 @@
+{
+  "description": "Instructs Claude Code to use the knowledge skill for all Claude Code related questions",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sessionstart.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}

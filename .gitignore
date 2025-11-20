@@ -1,0 +1,40 @@
+# Log files
+*.log
+debug*.log
+
+# Local settings
+settings.local.json
+*.local.json
+
+# Claude Code local directories
+.claude/
+
+# Plugin metadata (keep root marketplace.json but ignore nested ones)
+# The root .claude-plugin/marketplace.json should be tracked
+# Individual plugin .claude-plugin/plugin.json files should be tracked
+
+# Test/development directories
+test-plugin/
+
+# Node modules (if any JavaScript projects are added)
+node_modules/
+
+# Environment files
+.env
+.env.local
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp

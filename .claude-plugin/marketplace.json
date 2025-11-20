@@ -1,0 +1,21 @@
+{
+  "name": "my-claude-plugins",
+  "owner": {
+    "name": "Christian Pedersen",
+    "email": "christian@dkmaker.xyz"
+  },
+  "metadata": {
+    "description": "Various life improvement plugins for Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "claude-expert",
+      "source": "./claude-expert",
+      "description": "Expert knowledge system for Claude Code with complete documentation database, intelligent search, and transformation pipeline. Provides authoritative answers to all Claude Code questions using official documentation.",
+      "version": "1.0.0",
+      "keywords": ["documentation", "expert", "knowledge", "claude-code", "help", "search"],
+      "category": "knowledge"
+    }
+  ]
+}
