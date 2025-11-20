@@ -135,10 +135,10 @@
           "description": "Deploying Claude Code on AWS Bedrock"
         },
         {
-          "title": "Azure AI Foundry",
-          "url": "https://code.claude.com/docs/en/azure-ai-foundry",
-          "filename": "azure-ai-foundry.md",
-          "description": "Deploying on Microsoft Azure AI platform"
+          "title": "Microsoft Foundry",
+          "url": "https://code.claude.com/docs/en/microsoft-foundry",
+          "filename": "microsoft-foundry.md",
+          "description": "Deploying on Microsoft Foundry (formerly Azure AI Foundry)"
         },
         {
           "title": "Google Vertex AI",
