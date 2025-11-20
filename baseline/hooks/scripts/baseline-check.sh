@@ -216,32 +216,106 @@ if [[ "$NEEDS_CONFIG_UPDATE" == "true" ]]; then
     CONFIG_CHANGES_MADE=true
 fi
 
-# Build system message
-SYSTEM_MSG="✅ Baseline: Settings updated
+# Build detailed system message with specific changes
+CHANGES_LIST=""
+BACKUP_INFO=""
+
+# Analyze settings.json changes
+if [[ "$MERGED_SETTINGS" != "$CURRENT_SETTINGS" ]]; then
+    # Check each specific setting that changed
+    OLD_BASH_TIMEOUT=$(echo "$CURRENT_SETTINGS" | jq -r '.env.BASH_DEFAULT_TIMEOUT_MS // "not_set"')
+    OLD_MAX_TIMEOUT=$(echo "$CURRENT_SETTINGS" | jq -r '.env.BASH_MAX_TIMEOUT_MS // "not_set"')
+    OLD_MAINTAIN_DIR=$(echo "$CURRENT_SETTINGS" | jq -r '.env.CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR // "not_set"')
+    OLD_DISABLE_MSGS=$(echo "$CURRENT_SETTINGS" | jq -r '.env.DISABLE_NON_ESSENTIAL_MODEL_CALLS // "not_set"')
+    OLD_CO_AUTHORED=$(echo "$CURRENT_SETTINGS" | jq -r '.includeCoAuthoredBy // "not_set"')
+    OLD_THINKING=$(echo "$CURRENT_SETTINGS" | jq -r '.alwaysThinkingEnabled // "not_set"')
+    OLD_SPINNER=$(echo "$CURRENT_SETTINGS" | jq -r '.spinnerTipsEnabled // "not_set"')
+    OLD_STATUSLINE=$(echo "$CURRENT_SETTINGS" | jq -r '.statusLine.command // "not_set"')
+
+    # BASH_DEFAULT_TIMEOUT_MS
+    if [[ "$OLD_BASH_TIMEOUT" != "300000" ]]; then
+        CHANGES_LIST="${CHANGES_LIST}
+  • BASH_DEFAULT_TIMEOUT_MS: ${OLD_BASH_TIMEOUT} → 300000
+    Why: Extends default timeout to 5 minutes for long-running operations"
+    fi
+
+    # BASH_MAX_TIMEOUT_MS
+    if [[ "$OLD_MAX_TIMEOUT" != "600000" ]]; then
+        CHANGES_LIST="${CHANGES_LIST}
+  • BASH_MAX_TIMEOUT_MS: ${OLD_MAX_TIMEOUT} → 600000
+    Why: Allows up to 10 minutes for complex build/deploy tasks"
+    fi
+
+    # CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR
+    if [[ "$OLD_MAINTAIN_DIR" != "1" ]]; then
+        CHANGES_LIST="${CHANGES_LIST}
+  • CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR: ${OLD_MAINTAIN_DIR} → 1
+    Why: Keeps bash commands in project directory for consistency"
+    fi
+
+    # DISABLE_NON_ESSENTIAL_MODEL_CALLS
+    if [[ "$OLD_DISABLE_MSGS" != "1" ]]; then
+        CHANGES_LIST="${CHANGES_LIST}
+  • DISABLE_NON_ESSENTIAL_MODEL_CALLS: ${OLD_DISABLE_MSGS} → 1
+    Why: Reduces noise from internal model communication"
+    fi
+
+    # includeCoAuthoredBy
+    if [[ "$OLD_CO_AUTHORED" != "false" ]]; then
+        CHANGES_LIST="${CHANGES_LIST}
+  • includeCoAuthoredBy: ${OLD_CO_AUTHORED} → false
+    Why: Keeps git commits clean without 'Co-Authored-By: Claude' tags"
+    fi
+
+    # alwaysThinkingEnabled
+    if [[ "$OLD_THINKING" != "false" ]]; then
+        CHANGES_LIST="${CHANGES_LIST}
+  • alwaysThinkingEnabled: ${OLD_THINKING} → false
+    Why: Disables verbose thinking output for cleaner responses"
+    fi
+
+    # spinnerTipsEnabled
+    if [[ "$OLD_SPINNER" != "false" ]]; then
+        CHANGES_LIST="${CHANGES_LIST}
+  • spinnerTipsEnabled: ${OLD_SPINNER} → false
+    Why: Removes distracting tips during loading spinners"
+    fi
+
+    # statusLine
+    if [[ "$OLD_STATUSLINE" != "$PLUGIN_STATUSLINE_PATH" ]]; then
+        CHANGES_LIST="${CHANGES_LIST}
+  • statusLine: configured
+    Why: Adds custom statusline with model info and update notifications"
+    fi
+
+    BACKUP_INFO="${BACKUP_INFO}
+  📁 Backup: $BACKUP_FILE"
+fi
+
+# Check autoCompactEnabled change
+if [[ "$NEEDS_CONFIG_UPDATE" == "true" ]]; then
+    CHANGES_LIST="${CHANGES_LIST}
+  • autoCompactEnabled: ${AUTO_COMPACT_DISABLED} → false
+    Why: Prevents unwanted auto-compaction during sessions (use /compact manually)"
+
+    BACKUP_INFO="${BACKUP_INFO}
+  📁 Backup: $CLAUDE_CONFIG_BACKUP"
+fi
+
+# Build final message only if changes were made
+if [[ -n "$CHANGES_LIST" ]]; then
+    SYSTEM_MSG="✅ Baseline: Settings updated
 
 ⚠️ RESTART Claude Code to apply changes:
   - Exit this session
   - Run 'claude' again
 
-Changes applied:"
-
-# Add specific changes based on what was updated
-if [[ "$MERGED_SETTINGS" != "$CURRENT_SETTINGS" ]]; then
-    SYSTEM_MSG="$SYSTEM_MSG
-  - Ensured optimal bash timeouts
-  - Disabled non-essential messages
-  - Configured statusline
-  - Backup: $BACKUP_FILE"
+Changes applied:${CHANGES_LIST}
+${BACKUP_INFO}"
+else
+    # This shouldn't happen given the logic, but just in case
+    SYSTEM_MSG="✅ Baseline: No changes needed"
 fi
-
-if [[ "$NEEDS_CONFIG_UPDATE" == "true" ]]; then
-    SYSTEM_MSG="$SYSTEM_MSG
-  - Disabled autoCompact (autoCompactEnabled: false)
-  - Backup: $CLAUDE_CONFIG_BACKUP"
-fi
-
-SYSTEM_MSG="$SYSTEM_MSG
-"
 
 # Add optional tools warning if needed
 if [[ ${#missing_optional[@]} -gt 0 ]]; then
