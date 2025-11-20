@@ -9,6 +9,8 @@ A collection of Claude Code plugins and tools for enhancing development workflow
 This repository contains:
 
 - **Claude Expert Plugin** - Expert knowledge system with comprehensive Claude Code documentation
+- **Perplexity Plugin** - Real-time web search and research via Perplexity AI's MCP server
+- **Playwright Plugin** - Browser automation and testing via Playwright's MCP server
 - **Plugin Marketplace Configuration** - Enables plugin distribution and installation
 
 ### Claude Expert Plugin
@@ -27,6 +29,43 @@ This repository contains:
 
 **See:** [claude-expert/README.md](claude-expert/README.md) for detailed documentation.
 
+### Perplexity Plugin
+
+**Real-time web search and research through Perplexity AI.**
+
+**Location:** `perplexity/`
+
+**Features:**
+- Real-time web search via Perplexity API
+- Advanced reasoning capabilities
+- Research and information gathering
+- MCP server integration
+
+**Requirements:**
+- Node.js (for npx)
+- Perplexity API key from [Perplexity AI](https://docs.perplexity.ai)
+
+**See:** [perplexity/README.md](perplexity/README.md) for setup instructions.
+
+### Playwright Plugin
+
+**Browser automation and testing with Playwright.**
+
+**Location:** `playwright/`
+
+**Features:**
+- Browser automation (Chrome, Firefox, WebKit)
+- End-to-end testing
+- Web scraping capabilities
+- Screenshots and PDF generation
+- MCP server integration
+
+**Requirements:**
+- Node.js (for npx)
+- Browsers (auto-downloaded on first use)
+
+**See:** [playwright/README.md](playwright/README.md) for usage instructions.
+
 ## Installation
 
 ### Add the Marketplace
@@ -40,6 +79,13 @@ This repository contains:
 ```bash
 # Install the Claude Expert plugin
 /plugin install my-claude-plugins/claude-expert
+
+# Install the Perplexity plugin (requires PERPLEXITY_API_KEY env var)
+export PERPLEXITY_API_KEY="your-api-key-here"
+/plugin install my-claude-plugins/perplexity
+
+# Install the Playwright plugin
+/plugin install my-claude-plugins/playwright
 ```
 
 Restart Claude Code to activate installed plugins.
@@ -52,22 +98,30 @@ claude-plugins/
 ├── README.md                     # This file
 ├── .claude-plugin/
 │   └── marketplace.json          # Plugin marketplace configuration
-└── claude-expert/                # Claude Expert plugin
+├── claude-expert/                # Claude Expert plugin
+│   ├── README.md                 # Plugin documentation
+│   ├── .claude-plugin/
+│   │   └── plugin.json           # Plugin metadata
+│   ├── agents/
+│   │   └── claude-docs.md        # Agent for documentation queries
+│   ├── hooks/
+│   │   ├── hooks.json            # Hook configuration
+│   │   └── scripts/
+│   │       └── sessionstart.sh   # Session initialization script
+│   ├── scripts/
+│   │   ├── claude-docs.sh        # Documentation CLI tool
+│   │   └── claude-docs-urls.json # Documentation URLs
+│   └── skills/
+│       └── docs/
+│           └── SKILL.md          # Skill definition
+├── perplexity/                   # Perplexity plugin
+│   ├── README.md                 # Plugin documentation
+│   └── .claude-plugin/
+│       └── plugin.json           # Plugin metadata with MCP config
+└── playwright/                   # Playwright plugin
     ├── README.md                 # Plugin documentation
-    ├── .claude-plugin/
-    │   └── plugin.json           # Plugin metadata
-    ├── agents/
-    │   └── claude-docs.md        # Agent for documentation queries
-    ├── hooks/
-    │   ├── hooks.json            # Hook configuration
-    │   └── scripts/
-    │       └── sessionstart.sh   # Session initialization script
-    ├── scripts/
-    │   ├── claude-docs.sh        # Documentation CLI tool
-    │   └── claude-docs-urls.json # Documentation URLs
-    └── skills/
-        └── docs/
-            └── SKILL.md          # Skill definition
+    └── .claude-plugin/
+        └── plugin.json           # Plugin metadata with MCP config
 ```
 
 ## Usage

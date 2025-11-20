@@ -1,0 +1,27 @@
+{
+  "name": "playwright",
+  "version": "1.0.0",
+  "description": "Browser automation and testing with Playwright via MCP server",
+  "author": {
+    "name": "Playwright Team"
+  },
+  "homepage": "https://playwright.dev",
+  "repository": "https://github.com/microsoft/playwright",
+  "license": "Apache-2.0",
+  "keywords": [
+    "mcp",
+    "playwright",
+    "browser",
+    "automation",
+    "testing",
+    "e2e",
+    "web"
+  ],
+  "mcpServers": {
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    }
+  }
+}

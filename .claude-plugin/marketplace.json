@@ -16,6 +16,22 @@
       "version": "1.0.0",
       "keywords": ["documentation", "expert", "knowledge", "claude-code", "help", "search"],
       "category": "knowledge"
+    },
+    {
+      "name": "perplexity",
+      "source": "./perplexity",
+      "description": "Real-time web search, reasoning, and research through Perplexity's API via MCP server",
+      "version": "0.5.0",
+      "keywords": ["mcp", "search", "web-search", "perplexity", "research", "reasoning", "ai"],
+      "category": "productivity"
+    },
+    {
+      "name": "playwright",
+      "source": "./playwright",
+      "description": "Browser automation and testing with Playwright via MCP server",
+      "version": "1.0.0",
+      "keywords": ["mcp", "playwright", "browser", "automation", "testing", "e2e", "web"],
+      "category": "testing"
     }
   ]
 }
