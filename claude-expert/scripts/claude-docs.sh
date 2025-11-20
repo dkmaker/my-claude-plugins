@@ -12,6 +12,7 @@ DIFF_DIR="${DOCS_DIR}/.diffs"
 JSON_FILE="${SCRIPT_DIR}/claude-docs-urls.json"
 CHANGELOG_FILE="${DOCS_DIR}/CHANGELOG.md"
 LAST_UPDATE_FILE="${DOCS_DIR}/.last-update"
+MISSING_DOCS_FILE="${DOCS_DIR}/.missing-docs"
 
 # Cache version - increment when pipeline changes to invalidate all caches
 CACHE_VERSION="v1"
@@ -38,6 +39,34 @@ log_warn() {
 
 log_error() {
     echo -e "${RED}[ERROR]${NC} $*"
+}
+
+# Show warning for missing documents
+show_missing_docs_warning() {
+    if [[ -f "$MISSING_DOCS_FILE" ]] && [[ -s "$MISSING_DOCS_FILE" ]]; then
+        local count=$(wc -l < "$MISSING_DOCS_FILE")
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" >&2
+        echo -e "${YELLOW}⚠  WARNING: $count documentation section(s) unavailable${NC}" >&2
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" >&2
+        echo "" >&2
+        echo "The following sections could not be downloaded:" >&2
+        echo "" >&2
+
+        while IFS='|' read -r slug url; do
+            echo "  ✗ $slug" >&2
+            echo "    URL: $url.md" >&2
+        done < "$MISSING_DOCS_FILE"
+
+        echo "" >&2
+        echo "Possible reasons:" >&2
+        echo "  - Section was renamed or removed from official docs" >&2
+        echo "  - URL in claude-docs-urls.json is incorrect" >&2
+        echo "  - Temporary network/server issue" >&2
+        echo "" >&2
+        echo "To fix: Update claude-docs-urls.json and run 'claude-docs.sh update'" >&2
+        echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}" >&2
+        echo "" >&2
+    fi
 }
 
 # Check if documentation has been downloaded
@@ -200,9 +229,27 @@ get_doc() {
     local file="${DOCS_DIR}/${slug}.md"
 
     if [[ ! -f "$file" ]]; then
-        log_error "Document not found: $slug" >&2
-        log_info "Available docs:" >&2
-        ls -1 "${DOCS_DIR}"/*.md 2>/dev/null | xargs -n1 basename | sed 's/.md$//' | grep -v "CHANGELOG\|INDEX" | column >&2 || true
+        # Check if it's a known missing document
+        if [[ -f "$MISSING_DOCS_FILE" ]] && grep -q "^${slug}|" "$MISSING_DOCS_FILE" 2>/dev/null; then
+            local missing_url=$(grep "^${slug}|" "$MISSING_DOCS_FILE" | cut -d'|' -f2)
+            log_error "Documentation unavailable: $slug" >&2
+            echo "" >&2
+            log_warn "This section could not be downloaded from the official docs" >&2
+            echo "" >&2
+            echo "URL attempted: ${missing_url}.md" >&2
+            echo "" >&2
+            log_info "Possible reasons:" >&2
+            echo "  - Section was renamed or removed" >&2
+            echo "  - URL in claude-docs-urls.json is incorrect" >&2
+            echo "  - Network/server issue" >&2
+            echo "" >&2
+            log_info "To fix: Update the URL in claude-docs-urls.json (line $(grep -n "\"${url}\"" "$JSON_FILE" | cut -d: -f1 | head -1))" >&2
+            echo "Then run: $SCRIPT_NAME update" >&2
+        else
+            log_error "Document not found: $slug" >&2
+            log_info "Available docs:" >&2
+            ls -1 "${DOCS_DIR}"/*.md 2>/dev/null | xargs -n1 basename | sed 's/.md$//' | grep -v "CHANGELOG\|INDEX" | column >&2 || true
+        fi
         return 1
     fi
 
@@ -1185,6 +1232,8 @@ update_check() {
             fi
         else
             echo "$filename" >> "${pending_dir}/failed.list"
+            # Track URL for missing docs file
+            echo "${filename%.md}|${url}" >> "${pending_dir}/missing-urls.tmp"
         fi
 
         # Progress indicator (dot every 2 files)
@@ -1197,12 +1246,26 @@ update_check() {
     rm -f "$docs_list"
     echo " Done"
 
+    # Update missing docs file
+    if [[ -f "${pending_dir}/missing-urls.tmp" ]]; then
+        mv "${pending_dir}/missing-urls.tmp" "$MISSING_DOCS_FILE"
+    else
+        # No failures - clear missing docs file
+        rm -f "$MISSING_DOCS_FILE"
+    fi
+
     # Generate summary
     generate_update_summary "$pending_dir"
 
     # Show results
     echo ""
     cat "${pending_dir}/summary.txt"
+
+    # Show missing docs warning if any
+    if [[ -f "$MISSING_DOCS_FILE" ]]; then
+        echo ""
+        show_missing_docs_warning
+    fi
 
     # Check if any changes
     local new_count=0
@@ -1380,17 +1443,12 @@ update_commit() {
         return 1
     fi
 
-    # Check for failures - prevent commit if any downloads failed
+    # Warn about failures but don't block (they're tracked in .missing-docs)
     if [[ -f "${pending_dir}/failed.list" ]]; then
         local failed_count=$(wc -l < "${pending_dir}/failed.list")
-        log_error "Cannot commit with $failed_count failed downloads!"
-        log_info "Failed documents:"
-        while IFS= read -r filename; do
-            echo "  ✗ ${filename%.md}"
-        done < "${pending_dir}/failed.list"
+        log_warn "Note: $failed_count section(s) failed to download (tracked in .missing-docs)"
+        echo "These will be flagged as unavailable until URLs are fixed"
         echo ""
-        log_info "Fix the URLs in claude-docs-urls.json and run 'update' again"
-        return 1
     fi
 
     # Show what will be applied
@@ -1574,8 +1632,15 @@ list_docs() {
                 # Output table row
                 echo "| $slug | $display_name | $brief | $last_updated |"
             else
-                # File not downloaded yet
-                echo "| $slug | (not downloaded) | | |"
+                # Check if it's in the missing docs list
+                if [[ -f "$MISSING_DOCS_FILE" ]] && grep -q "^${slug}|" "$MISSING_DOCS_FILE" 2>/dev/null; then
+                    # Get URL from missing docs file
+                    local missing_url=$(grep "^${slug}|" "$MISSING_DOCS_FILE" | cut -d'|' -f2)
+                    echo "| $slug | ⚠️ UNAVAILABLE | Download failed - URL: ${missing_url}.md | |"
+                else
+                    # File not downloaded yet (initial state)
+                    echo "| $slug | (not downloaded) | Run 'update' to download | |"
+                fi
             fi
         done
 
@@ -1860,6 +1925,7 @@ main() {
             ;;
         get)
             check_docs_exist
+            show_missing_docs_warning
             local no_cache=false
             if [[ "$1" == "--no-cache" ]]; then
                 no_cache=true
@@ -1874,6 +1940,7 @@ main() {
             ;;
         list)
             check_docs_exist
+            show_missing_docs_warning
             local no_cache=false
             if [[ "${1:-}" == "--no-cache" ]]; then
                 no_cache=true
@@ -1883,6 +1950,7 @@ main() {
             ;;
         search)
             check_docs_exist
+            show_missing_docs_warning
             if [[ -z "$1" ]]; then
                 log_error "Search query required"
                 log_info "Usage: $SCRIPT_NAME search '<query>'"
@@ -1918,6 +1986,7 @@ main() {
             exit 1
             ;;
         help|--help|-h)
+            show_missing_docs_warning
             show_help
             ;;
         *)
