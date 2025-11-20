@@ -192,7 +192,7 @@ jq -n \
       hookEventName: "SessionStart",
       additionalContext: $context
     },
-    systemMessage: "✓ Claude Code Expert plugin active - use claude-expert:docs skill or claude-docs subagent for current documentation"
+    systemMessage: "✅ Claude Code Expert plugin loaded"
   }'
 
 debug_log "JSON output generated successfully"
