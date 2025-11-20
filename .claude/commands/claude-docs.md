@@ -55,32 +55,46 @@ First, analyze the request to understand what topic the user wants:
 
 ### STEP 3: Load the documentation
 
-**For exact commands:**
+**Understanding the tools:**
 
-- **list**: `!claude-expert/scripts/claude-docs.sh list`
-- **list <slug>**: `!claude-expert/scripts/claude-docs.sh list <slug>`
-- **get <slug>**: `!claude-expert/scripts/claude-docs.sh get '<slug>'`
-- **get <slug>#<anchor>**: `!claude-expert/scripts/claude-docs.sh get '<slug>#<anchor>'`
-- **search <query>**: `!claude-expert/scripts/claude-docs.sh search '<query>'`
+- **`list`** - Shows all available documentation sections (already preloaded above)
+- **`list <slug>`** - Shows the TABLE OF CONTENTS for a specific document (useful for browsing structure)
+- **`get <slug>`** - Loads the ENTIRE document including ALL sections
+- **`get <slug>#<anchor>`** - Loads ONLY a specific section (rarely needed - use sparingly!)
+- **`search <query>`** - Searches across all documentation
 
-**For topic-based requests (e.g., "fetch docs about plugins"):**
+**Default approach - Start simple:**
 
-1. Identify the topic from the request
-2. Search the preloaded list above for ALL slugs containing that topic
-3. Load EACH relevant slug using `!claude-expert/scripts/claude-docs.sh get '<slug>'`
-4. Inform the user of ALL sections loaded
+1. **For topic-based requests**, load full documents with `get <slug>`:
+   ```bash
+   !claude-expert/scripts/claude-docs.sh get plugins
+   !claude-expert/scripts/claude-docs.sh get plugin-marketplaces
+   !claude-expert/scripts/claude-docs.sh get plugins-reference
+   ```
 
-**Example for "plugins" topic:**
+2. **Evaluate if you have enough** - The full documents include ALL their sections
+
+3. **Only use anchors if:**
+   - User specifically asked for one section (e.g., "get the quickstart section")
+   - You want to show a TOC first with `list <slug>` then get a specific part
+   - The document is huge and you only need one section
+
+**For exact command syntax:**
+
+- **`list`** → Already shown above, just reference it
+- **`list <slug>`** → Show TOC: `!claude-expert/scripts/claude-docs.sh list <slug>`
+- **`get <slug>`** → Load full doc: `!claude-expert/scripts/claude-docs.sh get '<slug>'`
+- **`get <slug>#<anchor>`** → Only if specifically requested: `!claude-expert/scripts/claude-docs.sh get '<slug>#<anchor>'`
+- **`search <query>`** → Search all docs: `!claude-expert/scripts/claude-docs.sh search '<query>'`
+
+**Example workflow for "plugins" topic:**
 ```bash
+# Load all full documents (includes all sections)
 !claude-expert/scripts/claude-docs.sh get plugins
 !claude-expert/scripts/claude-docs.sh get plugin-marketplaces
 !claude-expert/scripts/claude-docs.sh get plugins-reference
-```
 
-**Example for "hooks" topic:**
-```bash
-!claude-expert/scripts/claude-docs.sh get hooks-guide
-!claude-expert/scripts/claude-docs.sh get hooks
+# That's it! All sections are now loaded. No need for anchors.
 ```
 
 ### STEP 4: Inform the user what was loaded
@@ -90,13 +104,14 @@ After loading documentation, clearly state:
 2. **What the user can now ask about** - Summarize the topics covered
 3. **Offer to load more** - Suggest related documentation if relevant
 
-### Important Notes:
+### Important Principles:
 
-1. **Load ALL related documentation** - Don't just load one section if multiple exist for a topic
-2. **Always use quotes** around arguments with special characters: `get 'plugins#quickstart'`
-3. **Read-only mode** - Only load docs, no code changes
-4. **Be comprehensive** - When in doubt, load more rather than less
-5. **Tool reference** - Always use full path: `claude-expert/scripts/claude-docs.sh`
+1. **Start with full documents** - Use `get <slug>` to load entire documents (includes all sections)
+2. **Load ALL related docs** - Don't just load one if multiple exist for a topic
+3. **Avoid unnecessary anchors** - Only use `get <slug>#<anchor>` when specifically requested
+4. **Read-only mode** - Only load docs, no code changes
+5. **Be comprehensive** - When in doubt, load more full documents rather than less
+6. **Tool reference** - Always use full path: `claude-expert/scripts/claude-docs.sh`
 
 ### Example Responses:
 
@@ -104,24 +119,56 @@ After loading documentation, clearly state:
 **You should:**
 1. Identify "plugins" as the topic
 2. Find ALL related slugs: `plugins`, `plugin-marketplaces`, `plugins-reference`
-3. Load all three sections
-4. Say: "I've loaded all plugins-related documentation (3 sections: main guide, marketplaces, and reference). What would you like to know about creating or managing plugins?"
+3. Load all three FULL documents (no anchors needed):
+   ```bash
+   !claude-expert/scripts/claude-docs.sh get plugins
+   !claude-expert/scripts/claude-docs.sh get plugin-marketplaces
+   !claude-expert/scripts/claude-docs.sh get plugins-reference
+   ```
+4. Say: "I've loaded all plugins documentation (3 complete sections). What would you like to know?"
 
-**User runs:** `/claude-docs get hooks`
+**User runs:** `/claude-docs get plugins#quickstart`
 **You should:**
-1. Recognize this could mean ALL hooks documentation
-2. Load both `hooks-guide` AND `hooks` reference
-3. Say: "I've loaded the hooks getting started guide and reference documentation. What would you like to know about hooks?"
+1. User specifically requested the quickstart section only
+2. Load just that section:
+   ```bash
+   !claude-expert/scripts/claude-docs.sh get 'plugins#quickstart'
+   ```
+3. Say: "I've loaded the plugins quickstart section. Would you like the full plugins documentation?"
 
-**User runs:** `/claude-docs search mcp`
+**User runs:** `/claude-docs list hooks`
 **You should:**
-1. Run the search command
-2. Show matching results
-3. Offer to load the complete `mcp` documentation if they want full details
+1. Show the table of contents for hooks:
+   ```bash
+   !claude-expert/scripts/claude-docs.sh list hooks
+   ```
+2. Ask: "Here's the hooks documentation structure. Would you like me to load the full documentation?"
+
+## Key Principles (Read Carefully!)
+
+**Default Loading Strategy:**
+1. **Always start with full documents** - Use `get <slug>` to load entire documents
+2. **Full document = ALL sections included** - When you `get plugins`, you get quickstart, installation, examples, everything!
+3. **Anchors are for specific requests only** - Only use `get <slug>#<anchor>` if user explicitly asks for one section
+4. **`list <slug>` is for browsing** - Shows table of contents, doesn't load content
+5. **Load multiple related docs** - Get all relevant slugs for comprehensive coverage
+
+**What NOT to do:**
+- ❌ Don't use anchors unless specifically requested
+- ❌ Don't load one section when the full document is better
+- ❌ Don't assume you need to browse with `list` first - just load the full docs
+- ❌ Don't modify files or write code - this is read-only documentation loading
+
+**What to do:**
+- ✅ Load full documents with `get <slug>`
+- ✅ Load ALL related slugs for a topic
+- ✅ Evaluate if you have enough information
+- ✅ Inform user what was loaded and offer to answer questions
 
 ## Remember
 
 - This command is for **loading documentation only** - no code changes
-- The documentation is already locally cached and transforms MDX to readable markdown
+- `get <slug>` loads the ENTIRE document including all subsections
+- Anchors are rarely needed - full documents are usually better
 - After loading docs, you're ready to answer questions about Claude Code plugin development
 - Always inform the user what documentation you've loaded into context
