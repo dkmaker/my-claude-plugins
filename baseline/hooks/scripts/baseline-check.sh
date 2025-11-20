@@ -10,6 +10,7 @@ INPUT_JSON=$(cat)
 # Configuration
 LAST_CHECK_FILE="$HOME/.claude/.baseline-last-check"
 SETTINGS_FILE="$HOME/.claude/settings.json"
+CLAUDE_CONFIG_FILE="$HOME/.claude.json"
 CHECK_INTERVAL_HOURS=2
 
 # Ensure .claude directory exists
@@ -112,6 +113,25 @@ else
     CURRENT_SETTINGS="{}"
 fi
 
+# ============================================================================
+# CLAUDE CONFIG MANAGEMENT (~/.claude.json)
+# ============================================================================
+
+# Read current claude config
+if [[ -f "$CLAUDE_CONFIG_FILE" ]]; then
+    CURRENT_CLAUDE_CONFIG=$(cat "$CLAUDE_CONFIG_FILE")
+else
+    CURRENT_CLAUDE_CONFIG="{}"
+fi
+
+# Check if autoCompactEnabled needs to be set to false
+AUTO_COMPACT_DISABLED=$(echo "$CURRENT_CLAUDE_CONFIG" | jq -r '.autoCompactEnabled // "not_set"')
+NEEDS_CONFIG_UPDATE=false
+
+if [[ "$AUTO_COMPACT_DISABLED" != "false" ]]; then
+    NEEDS_CONFIG_UPDATE=true
+fi
+
 # Resolve plugin root path for statusline
 PLUGIN_STATUSLINE_PATH="${CLAUDE_PLUGIN_ROOT}/statusline.sh"
 
@@ -132,14 +152,11 @@ MERGED_SETTINGS=$(jq -s '
     .includeCoAuthoredBy = $baseline.includeCoAuthoredBy |
     .statusLine = $baseline.statusLine |
     .alwaysThinkingEnabled = $baseline.alwaysThinkingEnabled |
-    .spinnerTipsEnabled = $baseline.spinnerTipsEnabled |
-
-    # Remove model key
-    del(.model)
+    .spinnerTipsEnabled = $baseline.spinnerTipsEnabled
 ' <(echo "$BASELINE_WITH_STATUSLINE") <(echo "$CURRENT_SETTINGS"))
 
 # Check if changes needed
-if [[ "$MERGED_SETTINGS" == "$CURRENT_SETTINGS" ]]; then
+if [[ "$MERGED_SETTINGS" == "$CURRENT_SETTINGS" ]] && [[ "$NEEDS_CONFIG_UPDATE" == "false" ]]; then
     # No changes needed
 
     # Report optional tools if missing
@@ -162,36 +179,68 @@ fi
 # Create backup with timestamp
 TIMESTAMP=$(date +"%Y-%m-%d-%H%M%S")
 BACKUP_FILE="$HOME/.claude/settings.json.backup-$TIMESTAMP"
+CONFIG_CHANGES_MADE=false
 
-cp "$SETTINGS_FILE" "$BACKUP_FILE" 2>/dev/null || {
-    # If current file doesn't exist, create empty backup
-    echo "{}" > "$BACKUP_FILE"
-}
+# Backup and update settings.json if needed
+if [[ "$MERGED_SETTINGS" != "$CURRENT_SETTINGS" ]]; then
+    cp "$SETTINGS_FILE" "$BACKUP_FILE" 2>/dev/null || {
+        # If current file doesn't exist, create empty backup
+        echo "{}" > "$BACKUP_FILE"
+    }
 
-# Rotate backups (keep max 10)
-BACKUP_DIR="$HOME/.claude"
-BACKUP_COUNT=$(ls -1 "$BACKUP_DIR"/settings.json.backup-* 2>/dev/null | wc -l)
+    # Rotate backups (keep max 10)
+    BACKUP_DIR="$HOME/.claude"
+    BACKUP_COUNT=$(ls -1 "$BACKUP_DIR"/settings.json.backup-* 2>/dev/null | wc -l)
 
-if [[ $BACKUP_COUNT -gt 10 ]]; then
-    # Delete oldest backups
-    ls -1t "$BACKUP_DIR"/settings.json.backup-* | tail -n +11 | xargs rm -f
+    if [[ $BACKUP_COUNT -gt 10 ]]; then
+        # Delete oldest backups
+        ls -1t "$BACKUP_DIR"/settings.json.backup-* | tail -n +11 | xargs rm -f
+    fi
+
+    # Write new settings
+    echo "$MERGED_SETTINGS" | jq '.' > "$SETTINGS_FILE"
+    CONFIG_CHANGES_MADE=true
 fi
 
-# Write new settings
-echo "$MERGED_SETTINGS" | jq '.' > "$SETTINGS_FILE"
+# Update ~/.claude.json if needed
+if [[ "$NEEDS_CONFIG_UPDATE" == "true" ]]; then
+    # Backup claude config
+    CLAUDE_CONFIG_BACKUP="$HOME/.claude.json.backup-$TIMESTAMP"
+    if [[ -f "$CLAUDE_CONFIG_FILE" ]]; then
+        cp "$CLAUDE_CONFIG_FILE" "$CLAUDE_CONFIG_BACKUP"
+    fi
+
+    # Update autoCompactEnabled to false
+    UPDATED_CLAUDE_CONFIG=$(echo "$CURRENT_CLAUDE_CONFIG" | jq '. + {autoCompactEnabled: false}')
+    echo "$UPDATED_CLAUDE_CONFIG" | jq '.' > "$CLAUDE_CONFIG_FILE"
+    CONFIG_CHANGES_MADE=true
+fi
 
 # Build system message
-SYSTEM_MSG="✅ Baseline: Settings updated (backup: $BACKUP_FILE)
+SYSTEM_MSG="✅ Baseline: Settings updated
 
 ⚠️ RESTART Claude Code to apply changes:
   - Exit this session
   - Run 'claude' again
 
-Changes applied:
+Changes applied:"
+
+# Add specific changes based on what was updated
+if [[ "$MERGED_SETTINGS" != "$CURRENT_SETTINGS" ]]; then
+    SYSTEM_MSG="$SYSTEM_MSG
   - Ensured optimal bash timeouts
   - Disabled non-essential messages
   - Configured statusline
-  - Removed model override (if present)
+  - Backup: $BACKUP_FILE"
+fi
+
+if [[ "$NEEDS_CONFIG_UPDATE" == "true" ]]; then
+    SYSTEM_MSG="$SYSTEM_MSG
+  - Disabled autoCompact (autoCompactEnabled: false)
+  - Backup: $CLAUDE_CONFIG_BACKUP"
+fi
+
+SYSTEM_MSG="$SYSTEM_MSG
 "
 
 # Add optional tools warning if needed
