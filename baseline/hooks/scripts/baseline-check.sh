@@ -125,11 +125,20 @@ else
 fi
 
 # Check if autoCompactEnabled needs to be set to false
-AUTO_COMPACT_DISABLED=$(echo "$CURRENT_CLAUDE_CONFIG" | jq -r '.autoCompactEnabled // "not_set"')
-NEEDS_CONFIG_UPDATE=false
-
-if [[ "$AUTO_COMPACT_DISABLED" != "false" ]]; then
+# Note: Use 'has' to check if key exists, since // operator treats false as falsy
+if echo "$CURRENT_CLAUDE_CONFIG" | jq -e 'has("autoCompactEnabled")' >/dev/null 2>&1; then
+    AUTO_COMPACT_VALUE=$(echo "$CURRENT_CLAUDE_CONFIG" | jq -r '.autoCompactEnabled')
+    if [[ "$AUTO_COMPACT_VALUE" == "false" ]]; then
+        NEEDS_CONFIG_UPDATE=false
+        AUTO_COMPACT_DISABLED="false"
+    else
+        NEEDS_CONFIG_UPDATE=true
+        AUTO_COMPACT_DISABLED="$AUTO_COMPACT_VALUE"
+    fi
+else
+    # Key doesn't exist, needs to be set
     NEEDS_CONFIG_UPDATE=true
+    AUTO_COMPACT_DISABLED="not_set"
 fi
 
 # Resolve plugin root path for statusline
@@ -227,9 +236,12 @@ if [[ "$MERGED_SETTINGS" != "$CURRENT_SETTINGS" ]]; then
     OLD_MAX_TIMEOUT=$(echo "$CURRENT_SETTINGS" | jq -r '.env.BASH_MAX_TIMEOUT_MS // "not_set"')
     OLD_MAINTAIN_DIR=$(echo "$CURRENT_SETTINGS" | jq -r '.env.CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR // "not_set"')
     OLD_DISABLE_MSGS=$(echo "$CURRENT_SETTINGS" | jq -r '.env.DISABLE_NON_ESSENTIAL_MODEL_CALLS // "not_set"')
-    OLD_CO_AUTHORED=$(echo "$CURRENT_SETTINGS" | jq -r '.includeCoAuthoredBy // "not_set"')
-    OLD_THINKING=$(echo "$CURRENT_SETTINGS" | jq -r '.alwaysThinkingEnabled // "not_set"')
-    OLD_SPINNER=$(echo "$CURRENT_SETTINGS" | jq -r '.spinnerTipsEnabled // "not_set"')
+
+    # Boolean fields: Use 'if .key then true else false end' to avoid // treating false as null
+    OLD_CO_AUTHORED=$(echo "$CURRENT_SETTINGS" | jq -r 'if has("includeCoAuthoredBy") then .includeCoAuthoredBy else "not_set" end')
+    OLD_THINKING=$(echo "$CURRENT_SETTINGS" | jq -r 'if has("alwaysThinkingEnabled") then .alwaysThinkingEnabled else "not_set" end')
+    OLD_SPINNER=$(echo "$CURRENT_SETTINGS" | jq -r 'if has("spinnerTipsEnabled") then .spinnerTipsEnabled else "not_set" end')
+
     OLD_STATUSLINE=$(echo "$CURRENT_SETTINGS" | jq -r '.statusLine.command // "not_set"')
 
     # BASH_DEFAULT_TIMEOUT_MS
