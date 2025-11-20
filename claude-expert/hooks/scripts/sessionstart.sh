@@ -139,21 +139,13 @@ Claude Code changes frequently. Your training data is outdated. **ALWAYS** refer
 
 ## ✅ ALWAYS Use Official Documentation First:
 
-**You have TWO approved methods** (choose either):
+**Use the Documentation Skill:**
 
-### Method 1: Use the Documentation Skill (Recommended)
 ```
 skill: "claude-expert:docs"
 ```
 
-### Method 2: Use the Documentation Subagent
-```
-Task tool with:
-- subagent_type: "claude-docs"
-- prompt: "Your documentation question here"
-```
-
-Both methods access the same official documentation database with 44 sections via the `claude-docs.sh` tool.
+The Skill uses the `claude-docs.sh` CLI tool to access the official documentation database with 44 sections.
 
 ## When to Use Documentation:
 
@@ -174,9 +166,9 @@ Both methods access the same official documentation database with 44 sections vi
 
 ## Workflow:
 
-1. **User asks about Claude Code** → Use `claude-expert:docs` skill or `claude-docs` subagent
-2. **Get current documentation** → Review official docs
-3. **Then provide answer/implementation** → Based on current documentation
+1. **User asks about Claude Code** → Use `claude-expert:docs` skill
+2. **Skill loads documentation** → Using `claude-docs.sh` CLI tool
+3. **Provide answer/implementation** → Based on current documentation
 
 ## Note on claude-code-guide Agent Override:
 

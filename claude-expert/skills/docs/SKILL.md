@@ -1,18 +1,20 @@
 ---
 name: docs
 description: Get official Claude Code documentation. Use when the user asks about Claude Code features OR when you need to create/implement plugins, skills, hooks, subagents, slash commands, or MCP servers. Always retrieve documentation BEFORE implementing any Claude Code feature. Topics include configuration, settings, deployment, and troubleshooting.
-allowed-tools: Task
+allowed-tools: Bash(claude-docs.sh:*)
 ---
 
-# Claude Code Documentation Finder
+# Claude Code Documentation
 
-This Skill helps you find and retrieve official Claude Code documentation by delegating to a specialized documentation retrieval agent.
+This Skill provides access to official Claude Code documentation through the `claude-docs.sh` CLI tool.
+
+## Available Documentation
+
+The plugin's session hook adds `claude-docs.sh` to your PATH, making it available as a simple command.
 
 ## When to Use This Skill
 
-Activate this Skill when:
-
-**The user asks questions:**
+**User asks questions:**
 - "How do I..." (create plugins, use hooks, configure settings, etc.)
 - "Can Claude Code..." (feature capability questions)
 - "What are..." (subagents, MCP servers, skills, etc.)
@@ -20,7 +22,7 @@ Activate this Skill when:
 - Questions about configuration, setup, deployment
 - Troubleshooting Claude Code issues
 
-**The user requests implementation:**
+**User requests implementation:**
 - "Create/make a skill that..." - Get skill documentation first
 - "Write a plugin for..." - Get plugin documentation first
 - "Add a hook that..." - Get hook documentation first
@@ -34,78 +36,108 @@ Activate this Skill when:
 - Before answering questions about Claude Code capabilities
 - When you're unsure about the correct way to implement a Claude Code feature
 
-## How This Skill Works
+## How to Use the CLI Tool
 
-This Skill uses the `claude-expert:claude-docs` agent to retrieve documentation. The agent:
-1. Lists all available documentation sections
-2. Searches and retrieves relevant documentation
-3. Can compare documentation with actual project configuration
-4. Provides accurate answers from official sources
+### Step 1: Identify what documentation is needed
 
-## Instructions
+Determine the topic from the user's question:
+- plugins, hooks, skills, mcp, agents, slash commands, settings, etc.
 
-When this Skill is activated:
+### Step 2: Load ALL related documentation
 
-1. **Use the Task tool** to invoke the documentation agent:
-   ```
-   Use Task tool with:
-   - subagent_type: "claude-expert:claude-docs"
-   - description: Brief description of what documentation is needed
-   - prompt: The user's question with full context
-   ```
+**Common topics and their related slugs (load ALL):**
+- **plugins** → `plugins`, `plugin-marketplaces`, `plugins-reference`
+- **hooks** → `hooks-guide`, `hooks`
+- **skills** → `skills`
+- **mcp** → `mcp`
+- **agents/subagents** → `sub-agents`
+- **slash commands** → `slash-commands`
+- **settings** → `settings`
+- **security/iam** → `security`, `iam`
+- **monitoring** → `monitoring-usage`, `analytics`, `costs`
 
-2. **Pass the complete user question** to the agent with any relevant context
+### Step 3: Use the CLI tool with Bash
 
-3. **Let the agent handle all documentation retrieval** - it will:
-   - Search the documentation
-   - Retrieve relevant sections
-   - Check actual configuration if needed
-   - Provide comprehensive answers
-
-4. **Present the agent's findings** to the user clearly
-
-## Example Usage
-
-**User asks:** "How do I create a plugin with hooks?"
-
-**Your response:**
-```
-I'll use the documentation agent to find the official information about creating plugins with hooks.
-
-[Invoke Task tool with subagent_type="claude-expert:claude-docs"]
+**Load full documents (default approach):**
+```bash
+claude-docs.sh get plugins
+claude-docs.sh get plugin-marketplaces
+claude-docs.sh get plugins-reference
 ```
 
-**User asks:** "What environment variables are available in SessionStart hooks?"
+**Browse document structure (if needed):**
+```bash
+# See list of all available docs
+claude-docs.sh list
 
-**Your response:**
+# See table of contents for a specific document
+claude-docs.sh list plugins
 ```
-Let me retrieve the documentation about SessionStart hooks and environment variables.
 
-[Invoke Task tool with subagent_type="claude-expert:claude-docs"]
+**Search for specific topics:**
+```bash
+claude-docs.sh search 'oauth'
+claude-docs.sh search 'environment variables'
 ```
+
+**Get specific section (only if specifically requested):**
+```bash
+claude-docs.sh get 'plugins#quickstart'
+```
+
+## Key Principles
+
+1. **Load full documents first** - `get <slug>` loads the entire document including all sections
+2. **Load ALL related docs** - Don't load just one if multiple exist for a topic
+3. **Avoid anchors unless needed** - Full documents are usually better than subsections
+4. **Be comprehensive** - When in doubt, load more documentation rather than less
 
 ## What NOT to Do
 
-L **Don't answer from your training data** - Always use the agent to get current documentation
-L **Don't try to search documentation yourself** - The agent has specialized tools for this
-L **Don't use other tools** - Only use Task to invoke the documentation agent
-L **Don't skip the agent** - Even if you think you know the answer, verify with current docs
+- ❌ Don't answer from training data without checking current docs
+- ❌ Don't use anchors (`get <slug>#<anchor>`) unless user specifically requests a section
+- ❌ Don't load just one doc when multiple related ones exist
+- ❌ Don't search the web before checking official documentation
 
-## Why Use a Subagent?
+## Example Workflows
 
-The documentation agent:
-- Has access to all official Claude Code documentation sections
-- Uses `claude-docs.sh` CLI tool for accurate, transformed documentation
-- Can search, retrieve, and compare with actual configuration
-- Provides up-to-date information (documentation may have changed since your training)
-- Knows about known bugs (like CLAUDE_ENV_FILE in plugin hooks)
-- Can check GitHub issues for problems not in official docs
+**User asks:** "How do I create a plugin with hooks?"
+
+1. Identify topics: plugins + hooks
+2. Load all related documentation:
+   ```bash
+   claude-docs.sh get plugins
+   claude-docs.sh get plugin-marketplaces
+   claude-docs.sh get plugins-reference
+   claude-docs.sh get hooks-guide
+   claude-docs.sh get hooks
+   ```
+3. Provide comprehensive answer from loaded docs
+
+**User asks:** "What are Skills?"
+
+1. Identify topic: skills
+2. Load documentation:
+   ```bash
+   claude-docs.sh get skills
+   ```
+3. Explain Skills concept from documentation
+
+**User asks:** "Can you help me set up MCP servers?"
+
+1. Identify topic: mcp
+2. Load documentation:
+   ```bash
+   claude-docs.sh get mcp
+   ```
+3. Provide setup instructions from docs
 
 ## Remember
 
-- **Always delegate** to the agent - it's specialized for documentation retrieval
-- **Pass full context** - include the user's complete question and any relevant details
-- **Trust the agent's response** - it has access to current, official documentation
-- **Keep it simple** - your job is to recognize documentation questions and route them to the agent
+- The `claude-docs.sh` command is in your PATH (added by the plugin's session hook)
+- Always load documentation BEFORE implementing Claude Code features
+- Documentation is locally cached and fast to retrieve
+- Full documents are comprehensive - you usually don't need subsections
+- After loading docs, provide answers based on official information
 
-This Skill ensures users always get accurate, up-to-date information from official Claude Code documentation.
+This Skill ensures you always have accurate, up-to-date Claude Code documentation when needed.

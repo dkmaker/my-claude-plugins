@@ -102,8 +102,6 @@ claude-plugins/
 │   ├── README.md                 # Plugin documentation
 │   ├── .claude-plugin/
 │   │   └── plugin.json           # Plugin metadata
-│   ├── agents/
-│   │   └── claude-docs.md        # Agent for documentation queries
 │   ├── hooks/
 │   │   ├── hooks.json            # Hook configuration
 │   │   └── scripts/
