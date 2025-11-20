@@ -870,6 +870,11 @@ ensure_cache_warm() {
         local filename
         filename=$(echo "$doc" | jq -r '.filename')
         local slug="${filename%.md}"
+        local source_file="${DOCS_DIR}/${slug}.md"
+
+        # Skip if source document doesn't exist (not downloaded)
+        [[ -f "$source_file" ]] || continue
+
         local cache_key=$(generate_cache_key "$slug")
         local cache_file="${CACHE_DIR}/${cache_key}.cache"
 
@@ -880,10 +885,10 @@ ensure_cache_warm() {
     done < /tmp/docs-check.tmp
     rm -f /tmp/docs-check.tmp
 
-    # Warm missing caches
+    # Warm missing caches (silently if all cached)
     if [[ $missing -gt 0 ]]; then
         log_info "Warming $missing missing cache entries..." >&2
-        cache_warm >&2
+        cache_warm >/dev/null 2>&1
     fi
 }
 
@@ -1100,13 +1105,24 @@ download_doc() {
 
     log_info "Downloading: $md_url"
 
-    if curl -sf "$md_url" -o "$final_output"; then
-        log_success "Downloaded: $(basename "$output_file")"
-        return 0
-    else
-        log_error "Failed to download: $md_url"
-        return 1
-    fi
+    # Retry up to 3 times with 2 second delay
+    local max_retries=3
+    local retry_delay=2
+
+    for attempt in $(seq 1 $max_retries); do
+        if curl -sf "$md_url" -o "$final_output"; then
+            log_success "Downloaded: $(basename "$output_file")"
+            return 0
+        fi
+
+        if [[ $attempt -lt $max_retries ]]; then
+            log_warn "Download failed (attempt $attempt/$max_retries), retrying in ${retry_delay}s..."
+            sleep $retry_delay
+        fi
+    done
+
+    log_error "Failed to download after $max_retries attempts: $md_url"
+    return 1
 }
 
 # Download all documents from JSON
@@ -1288,13 +1304,26 @@ generate_update_summary() {
             echo ""
         fi
 
+        # Failed downloads
+        if [[ -f "${pending_dir}/failed.list" ]]; then
+            local count=$(wc -l < "${pending_dir}/failed.list")
+            echo "FAILED: $count sections"
+            while IFS= read -r filename; do
+                local slug="${filename%.md}"
+                echo "  ✗ $slug  (download failed - check URL in claude-docs-urls.json)"
+            done < "${pending_dir}/failed.list"
+            echo ""
+        fi
+
         # Unchanged
         local total=$(jq -r '[.categories[].docs[]] | length' "$JSON_FILE")
         local changed=0
         local new=0
+        local failed=0
         [[ -f "${pending_dir}/changed.list" ]] && changed=$(wc -l < "${pending_dir}/changed.list")
         [[ -f "${pending_dir}/new.list" ]] && new=$(wc -l < "${pending_dir}/new.list")
-        local unchanged=$((total - changed - new))
+        [[ -f "${pending_dir}/failed.list" ]] && failed=$(wc -l < "${pending_dir}/failed.list")
+        local unchanged=$((total - changed - new - failed))
         echo "UNCHANGED: $unchanged sections"
 
     } > "$summary_file"
@@ -1348,6 +1377,19 @@ update_commit() {
 
     # Validate changelog
     if ! validate_changelog_message "$changelog_text"; then
+        return 1
+    fi
+
+    # Check for failures - prevent commit if any downloads failed
+    if [[ -f "${pending_dir}/failed.list" ]]; then
+        local failed_count=$(wc -l < "${pending_dir}/failed.list")
+        log_error "Cannot commit with $failed_count failed downloads!"
+        log_info "Failed documents:"
+        while IFS= read -r filename; do
+            echo "  ✗ ${filename%.md}"
+        done < "${pending_dir}/failed.list"
+        echo ""
+        log_info "Fix the URLs in claude-docs-urls.json and run 'update' again"
         return 1
     fi
 
