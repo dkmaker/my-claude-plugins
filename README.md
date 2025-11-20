@@ -25,7 +25,7 @@ This repository contains:
 - MDX transformation pipeline (converts JSX/MDX to clean markdown)
 - Smart caching system (10-38x performance improvement)
 - Update workflow for keeping documentation current
-- Built-in `claude-docs-cli` tool for documentation management
+- Built-in `claude-docs.sh` CLI tool for documentation management
 
 **See:** [claude-expert/README.md](claude-expert/README.md) for detailed documentation.
 
