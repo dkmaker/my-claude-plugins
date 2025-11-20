@@ -1,0 +1,17 @@
+{
+  "name": "baseline",
+  "version": "1.0.0",
+  "description": "Ensures optimal Claude Code defaults and validates required tools. Sets up statusline and recommended settings on session start.",
+  "author": {
+    "name": "Christian Pedersen",
+    "email": "christian@dkmaker.xyz"
+  },
+  "keywords": [
+    "configuration",
+    "defaults",
+    "tools",
+    "validation",
+    "statusline",
+    "settings"
+  ]
+}

@@ -11,6 +11,7 @@ This repository contains:
 - **Claude Expert Plugin** - Expert knowledge system with comprehensive Claude Code documentation
 - **Perplexity Plugin** - Real-time web search and research via Perplexity AI's MCP server
 - **Playwright Plugin** - Browser automation and testing via Playwright's MCP server
+- **Baseline Plugin** - Ensures optimal defaults, validates tools, and configures statusline
 - **Plugin Marketplace Configuration** - Enables plugin distribution and installation
 
 ### Claude Expert Plugin
@@ -66,6 +67,26 @@ This repository contains:
 
 **See:** [playwright/README.md](playwright/README.md) for usage instructions.
 
+### Baseline Plugin
+
+**Ensures optimal Claude Code defaults and tool validation.**
+
+**Location:** `baseline/`
+
+**Features:**
+- Validates required tools (jq, git, ripgrep)
+- Applies recommended settings automatically
+- Includes custom statusline
+- Smart throttling (checks every 2 hours)
+- Safe backup rotation (keeps 10 backups)
+
+**Requirements:**
+- jq (critical)
+- git (critical)
+- ripgrep/rg (optional)
+
+**See:** [baseline/README.md](baseline/README.md) for details.
+
 ## Installation
 
 ### Add the Marketplace
@@ -86,6 +107,9 @@ export PERPLEXITY_API_KEY="your-api-key-here"
 
 # Install the Playwright plugin
 /plugin install my-claude-plugins/playwright
+
+# Install the Baseline plugin (recommended for optimal defaults)
+/plugin install my-claude-plugins/baseline
 ```
 
 Restart Claude Code to activate installed plugins.
@@ -116,10 +140,19 @@ claude-plugins/
 │   ├── README.md                 # Plugin documentation
 │   └── .claude-plugin/
 │       └── plugin.json           # Plugin metadata with MCP config
-└── playwright/                   # Playwright plugin
+├── playwright/                   # Playwright plugin
+│   ├── README.md                 # Plugin documentation
+│   └── .claude-plugin/
+│       └── plugin.json           # Plugin metadata with MCP config
+└── baseline/                     # Baseline plugin
     ├── README.md                 # Plugin documentation
-    └── .claude-plugin/
-        └── plugin.json           # Plugin metadata with MCP config
+    ├── .claude-plugin/
+    │   └── plugin.json           # Plugin metadata
+    ├── hooks/
+    │   ├── hooks.json            # SessionStart hook config
+    │   └── scripts/
+    │       └── baseline-check.sh # Validation script
+    └── statusline.sh             # Custom statusline
 ```
 
 ## Usage

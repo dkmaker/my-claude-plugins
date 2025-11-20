@@ -32,6 +32,14 @@
       "version": "1.0.0",
       "keywords": ["mcp", "playwright", "browser", "automation", "testing", "e2e", "web"],
       "category": "testing"
+    },
+    {
+      "name": "baseline",
+      "source": "./baseline",
+      "description": "Ensures optimal Claude Code defaults and validates required tools. Includes custom statusline and recommended settings.",
+      "version": "1.0.0",
+      "keywords": ["configuration", "defaults", "tools", "validation", "statusline", "settings"],
+      "category": "productivity"
     }
   ]
 }
