@@ -41,7 +41,6 @@ First, analyze the request to understand what topic the user wants:
 - **agents/subagents** → `sub-agents`
 - **slash commands** → `slash-commands`
 - **settings** → `settings`
-- **deployment** → `third-party-integrations`, `amazon-bedrock`, `google-vertex-ai`, `azure-ai-foundry`, `network-config`, `llm-gateway`, `devcontainer`, `sandboxing`
 - **security/iam** → `security`, `iam`
 - **monitoring** → `monitoring-usage`, `analytics`, `costs`
 
