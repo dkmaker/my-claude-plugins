@@ -281,12 +281,14 @@ EOF
 SYSTEM_MESSAGE="✅ Claude Code Expert plugin loaded"
 
 if [ -n "$INSTALL_STATUS" ]; then
-    SYSTEM_MESSAGE="${SYSTEM_MESSAGE}\n${INSTALL_STATUS}"
+    SYSTEM_MESSAGE="${SYSTEM_MESSAGE}
+${INSTALL_STATUS}"
 fi
 
 if [ -n "$INSTALL_ERROR" ]; then
-    SYSTEM_MESSAGE="${SYSTEM_MESSAGE}\n${INSTALL_ERROR}"
-    SYSTEM_MESSAGE="${SYSTEM_MESSAGE}\n💡 Install manually: npm install -g \$(curl -s https://api.github.com/repos/dkmaker/claude-docs-cli/releases/latest | grep \"browser_download_url.*tgz\" | cut -d '\"' -f 4)"
+    SYSTEM_MESSAGE="${SYSTEM_MESSAGE}
+${INSTALL_ERROR}
+💡 Install manually: npm install -g \$(curl -s https://api.github.com/repos/dkmaker/claude-docs-cli/releases/latest | grep \"browser_download_url.*tgz\" | cut -d '\"' -f 4)"
 fi
 
 # Output JSON with hookSpecificOutput format
