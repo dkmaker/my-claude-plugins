@@ -18,9 +18,9 @@ The **Skill** is what gets activated when you ask Claude Code questions. Think o
 - **When it activates:** Questions like "How do I create a plugin?" or "Can Claude Code do X?"
 - **What it does next:** Uses the CLI tool directly to load documentation into context
 
-### 2. **CLI Tool** (`scripts/claude-docs.sh`)
+### 2. **CLI Tool** (`claude-docs`)
 
-The **CLI Tool** is a bash script that manages the actual documentation database.
+The **CLI Tool** is a Node.js-based command that manages the actual documentation database.
 
 - **What it does:** Downloads, caches, and searches documentation
 - **Features:**
@@ -28,16 +28,18 @@ The **CLI Tool** is a bash script that manages the actual documentation database
   - Retrieve specific sections
   - Transform MDX/JSX to readable markdown
   - Smart caching for speed
-- **Can be used manually:** You can run it yourself from the command line
+  - Automatic updates from GitHub releases
+- **Installation:** Automatically managed by the session hook
+- **Can be used manually:** Available globally as `claude-docs`
 - **Used by Skill:** The Skill calls this tool via Bash to load documentation
 
 ### 3. **Session Hook** (`hooks/scripts/sessionstart.sh`)
 
 The **Hook** runs when you start a new Claude Code session.
 
-- **What it does:** Adds `claude-docs.sh` to your PATH and tells Claude to use the Skill for documentation questions
+- **What it does:** Installs/updates the `claude-docs` CLI and tells Claude to use the Skill for documentation questions
 - **When it runs:** Automatically on session start
-- **Effect:** Makes the CLI tool available as a simple command and injects context instructions
+- **Effect:** Ensures CLI is installed and up-to-date, injects context instructions
 
 ## Installation
 
@@ -71,19 +73,20 @@ The plugin automatically activates and provides accurate answers.
 You can also use the documentation CLI directly:
 
 ```bash
-cd ~/.claude/plugins/my-claude-plugins/claude-expert/scripts/
-
 # Search for a topic
-./claude-docs.sh search 'oauth'
+claude-docs search 'oauth'
 
 # Get a specific documentation section
-./claude-docs.sh get plugins
+claude-docs get plugins
 
 # List all available documentation
-./claude-docs.sh list
+claude-docs list
 
 # Show structure of a document
-./claude-docs.sh list plugins
+claude-docs list plugins
+
+# Check version
+claude-docs --version
 ```
 
 ## Documentation Coverage
@@ -107,7 +110,7 @@ User asks question
        ↓
 Skill detects it's about Claude Code
        ↓
-Skill uses CLI tool (claude-docs.sh) via Bash
+Skill uses CLI tool (claude-docs) via Bash
        ↓
 CLI tool searches documentation database
        ↓
@@ -126,10 +129,7 @@ claude-expert/
 ├── hooks/
 │   ├── hooks.json               # Hook configuration
 │   └── scripts/
-│       └── sessionstart.sh      # Session startup script
-├── scripts/
-│   ├── claude-docs.sh           # Documentation CLI tool
-│   └── claude-docs-urls.json    # Documentation URL mappings
+│       └── sessionstart.sh      # Session startup script (manages claude-docs CLI)
 └── skills/
     └── docs/
         └── SKILL.md             # Skill definition
@@ -147,17 +147,16 @@ A Hook is a script that runs in response to events. The `SessionStart` hook runs
 
 ### What is the CLI Tool?
 
-The CLI tool is a standalone bash script that manages documentation. It downloads docs, caches them, searches them, and transforms them into readable format. Both you and the Skill can use it.
+The CLI tool is a Node.js-based command that manages documentation. It downloads docs, caches them, searches them, and transforms them into readable format. The session hook automatically installs and updates it. Both you and the Skill can use it.
 
 ## Maintenance
 
 ### Update Documentation
 
-Check for new documentation versions:
+The plugin automatically checks for CLI updates on each session start. To manually update:
 
 ```bash
-cd ~/.claude/plugins/my-claude-plugins/claude-expert/scripts/
-./claude-docs.sh update
+claude-docs update
 ```
 
 ### Clear Cache
@@ -165,26 +164,27 @@ cd ~/.claude/plugins/my-claude-plugins/claude-expert/scripts/
 If documentation seems stale:
 
 ```bash
-./claude-docs.sh cache clear
-./claude-docs.sh cache warm
+claude-docs cache clear
+claude-docs cache warm
 ```
 
 ## Requirements
 
 - **Claude Code** - Latest version
-- **System tools** - bash, curl, jq, diff
+- **Node.js and npm** - For installing the claude-docs CLI
+- **System tools** - bash, curl (for GitHub API)
 - **Disk space** - ~2MB
 
 ## Support
 
 For issues:
-- Check documentation: `./claude-docs.sh search '<topic>'`
-- List all docs: `./claude-docs.sh list`
-- Get help: `./claude-docs.sh help`
+- Check documentation: `claude-docs search '<topic>'`
+- List all docs: `claude-docs list`
+- Get help: `claude-docs --help`
 
 ## Version
 
-**1.0.0** - Initial release
+**2.0.0** - Migrated to Node.js-based claude-docs CLI with automatic installation and updates
 
 ## License
 

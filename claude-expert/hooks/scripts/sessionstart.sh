@@ -115,6 +115,75 @@ debug_log ""
 debug_log "Hook execution completed successfully"
 debug_log ""
 
+# ============================================================================
+# CLAUDE-DOCS CLI INSTALLATION AND UPDATE MANAGEMENT
+# ============================================================================
+
+INSTALL_STATUS=""
+INSTALL_ERROR=""
+
+# Check if claude-docs is installed
+if command -v claude-docs &>/dev/null; then
+    debug_log "✓ claude-docs is installed"
+
+    # Get local version
+    LOCAL_VERSION=$(claude-docs --version 2>/dev/null | tr -d '[:space:]')
+    debug_log "Local version: $LOCAL_VERSION"
+
+    # Check GitHub for latest version (with timeout)
+    GITHUB_VERSION=$(curl -s --max-time 5 https://api.github.com/repos/dkmaker/claude-docs-cli/releases/latest 2>/dev/null | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | tr -d 'v' | tr -d '[:space:]')
+
+    if [ -n "$GITHUB_VERSION" ] && [ "$LOCAL_VERSION" != "$GITHUB_VERSION" ]; then
+        debug_log "Update available: $LOCAL_VERSION -> $GITHUB_VERSION"
+        debug_log "Attempting to update..."
+
+        # Get download URL
+        DOWNLOAD_URL=$(curl -s --max-time 5 https://api.github.com/repos/dkmaker/claude-docs-cli/releases/latest 2>/dev/null | grep "browser_download_url.*tgz" | cut -d '"' -f 4)
+
+        if [ -n "$DOWNLOAD_URL" ]; then
+            # Attempt update in background to avoid blocking
+            if npm install -g "$DOWNLOAD_URL" &>/dev/null; then
+                INSTALL_STATUS="✅ Updated claude-docs: $LOCAL_VERSION → $GITHUB_VERSION"
+                debug_log "✓ Update successful"
+            else
+                INSTALL_STATUS="⚠️ Failed to update claude-docs (currently running v$LOCAL_VERSION)"
+                debug_log "✗ Update failed"
+            fi
+        else
+            debug_log "Could not fetch download URL"
+        fi
+    else
+        debug_log "claude-docs is up to date or version check failed"
+    fi
+else
+    debug_log "✗ claude-docs is not installed"
+    debug_log "Attempting to install from GitHub releases..."
+
+    # Get download URL for latest release
+    DOWNLOAD_URL=$(curl -s --max-time 5 https://api.github.com/repos/dkmaker/claude-docs-cli/releases/latest 2>/dev/null | grep "browser_download_url.*tgz" | cut -d '"' -f 4)
+
+    if [ -n "$DOWNLOAD_URL" ]; then
+        debug_log "Download URL: $DOWNLOAD_URL"
+
+        # Attempt installation
+        if npm install -g "$DOWNLOAD_URL" &>/dev/null; then
+            INSTALLED_VERSION=$(claude-docs --version 2>/dev/null | tr -d '[:space:]')
+            INSTALL_STATUS="✅ Installed claude-docs v$INSTALLED_VERSION"
+            debug_log "✓ Installation successful: v$INSTALLED_VERSION"
+        else
+            INSTALL_ERROR="⚠️ Failed to install claude-docs CLI"
+            debug_log "✗ Installation failed"
+        fi
+    else
+        INSTALL_ERROR="⚠️ Could not fetch claude-docs from GitHub (network issue or API rate limit)"
+        debug_log "✗ Could not fetch download URL"
+    fi
+fi
+
+debug_log ""
+debug_log "Claude-docs CLI check completed"
+debug_log ""
+
 # Build the context message
 CONTEXT_MESSAGE=$(cat << 'EOF'
 # Claude Code Expert Plugin Active
@@ -145,7 +214,7 @@ Claude Code changes frequently. Your training data is outdated. **ALWAYS** refer
 skill: "claude-expert:docs"
 ```
 
-The Skill uses the `claude-docs.sh` CLI tool to access the official documentation database with 44 sections.
+The Skill uses the `claude-docs` CLI tool to access the official documentation database with 44 sections.
 
 ## When to Use Documentation:
 
@@ -167,7 +236,7 @@ The Skill uses the `claude-docs.sh` CLI tool to access the official documentatio
 ## Workflow:
 
 1. **User asks about Claude Code** → Use `claude-expert:docs` skill
-2. **Skill loads documentation** → Using `claude-docs.sh` CLI tool
+2. **Skill loads documentation** → Using `claude-docs` CLI tool
 3. **Provide answer/implementation** → Based on current documentation
 
 ## Note on claude-code-guide Agent Override:
@@ -176,15 +245,28 @@ If you are invoked as the `claude-code-guide` agent, your ONLY job is to immedia
 EOF
 )
 
+# Build system message with installation status
+SYSTEM_MESSAGE="✅ Claude Code Expert plugin loaded"
+
+if [ -n "$INSTALL_STATUS" ]; then
+    SYSTEM_MESSAGE="${SYSTEM_MESSAGE}\n${INSTALL_STATUS}"
+fi
+
+if [ -n "$INSTALL_ERROR" ]; then
+    SYSTEM_MESSAGE="${SYSTEM_MESSAGE}\n${INSTALL_ERROR}"
+    SYSTEM_MESSAGE="${SYSTEM_MESSAGE}\n💡 Install manually: npm install -g \$(curl -s https://api.github.com/repos/dkmaker/claude-docs-cli/releases/latest | grep \"browser_download_url.*tgz\" | cut -d '\"' -f 4)"
+fi
+
 # Output JSON with hookSpecificOutput format
 jq -n \
   --arg context "$CONTEXT_MESSAGE" \
+  --arg sysmsg "$SYSTEM_MESSAGE" \
   '{
     hookSpecificOutput: {
       hookEventName: "SessionStart",
       additionalContext: $context
     },
-    systemMessage: "✅ Claude Code Expert plugin loaded"
+    systemMessage: $sysmsg
   }'
 
 debug_log "JSON output generated successfully"

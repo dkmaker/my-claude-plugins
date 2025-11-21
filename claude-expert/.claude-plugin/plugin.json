@@ -1,9 +1,9 @@
 {
   "name": "claude-expert",
-  "version": "1.0.0",
-  "description": "Expert knowledge system for Claude Code using comprehensive documentation database",
+  "version": "2.0.0",
+  "description": "Expert knowledge system for Claude Code using comprehensive documentation database with automatic CLI management",
   "author": {
     "name": "Claude Code Documentation Team"
   },
-  "keywords": ["documentation", "expert", "knowledge", "claude-code", "help"]
+  "keywords": ["documentation", "expert", "knowledge", "claude-code", "help", "nodejs", "cli"]
 }

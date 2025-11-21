@@ -1,16 +1,16 @@
 ---
 name: docs
 description: Get official Claude Code documentation. Use when the user asks about Claude Code features OR when you need to create/implement plugins, skills, hooks, subagents, slash commands, or MCP servers. Always retrieve documentation BEFORE implementing any Claude Code feature. Topics include configuration, settings, deployment, and troubleshooting.
-allowed-tools: Bash(claude-docs.sh:*)
+allowed-tools: Bash(claude-docs:*)
 ---
 
 # Claude Code Documentation
 
-This Skill provides access to official Claude Code documentation through the `claude-docs.sh` CLI tool.
+This Skill provides access to official Claude Code documentation through the `claude-docs` CLI tool.
 
 ## Available Documentation
 
-The plugin's session hook adds `claude-docs.sh` to your PATH, making it available as a simple command.
+The plugin's session hook installs the `claude-docs` CLI globally, making it available as a command.
 
 ## When to Use This Skill
 
@@ -60,29 +60,29 @@ Determine the topic from the user's question:
 
 **Load full documents (default approach):**
 ```bash
-claude-docs.sh get plugins
-claude-docs.sh get plugin-marketplaces
-claude-docs.sh get plugins-reference
+claude-docs get plugins
+claude-docs get plugin-marketplaces
+claude-docs get plugins-reference
 ```
 
 **Browse document structure (if needed):**
 ```bash
 # See list of all available docs
-claude-docs.sh list
+claude-docs list
 
 # See table of contents for a specific document
-claude-docs.sh list plugins
+claude-docs list plugins
 ```
 
 **Search for specific topics:**
 ```bash
-claude-docs.sh search 'oauth'
-claude-docs.sh search 'environment variables'
+claude-docs search 'oauth'
+claude-docs search 'environment variables'
 ```
 
 **Get specific section (only if specifically requested):**
 ```bash
-claude-docs.sh get 'plugins#quickstart'
+claude-docs get 'plugins#quickstart'
 ```
 
 ## Key Principles
@@ -106,11 +106,11 @@ claude-docs.sh get 'plugins#quickstart'
 1. Identify topics: plugins + hooks
 2. Load all related documentation:
    ```bash
-   claude-docs.sh get plugins
-   claude-docs.sh get plugin-marketplaces
-   claude-docs.sh get plugins-reference
-   claude-docs.sh get hooks-guide
-   claude-docs.sh get hooks
+   claude-docs get plugins
+   claude-docs get plugin-marketplaces
+   claude-docs get plugins-reference
+   claude-docs get hooks-guide
+   claude-docs get hooks
    ```
 3. Provide comprehensive answer from loaded docs
 
@@ -119,7 +119,7 @@ claude-docs.sh get 'plugins#quickstart'
 1. Identify topic: skills
 2. Load documentation:
    ```bash
-   claude-docs.sh get skills
+   claude-docs get skills
    ```
 3. Explain Skills concept from documentation
 
@@ -128,13 +128,13 @@ claude-docs.sh get 'plugins#quickstart'
 1. Identify topic: mcp
 2. Load documentation:
    ```bash
-   claude-docs.sh get mcp
+   claude-docs get mcp
    ```
 3. Provide setup instructions from docs
 
 ## Remember
 
-- The `claude-docs.sh` command is in your PATH (added by the plugin's session hook)
+- The `claude-docs` CLI is installed globally (managed by the plugin's session hook)
 - Always load documentation BEFORE implementing Claude Code features
 - Documentation is locally cached and fast to retrieve
 - Full documents are comprehensive - you usually don't need subsections

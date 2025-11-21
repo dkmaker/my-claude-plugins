@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(claude-expert/scripts/claude-docs.sh:*)
+allowed-tools: Bash(claude-docs:*)
 argument-hint: [list|get <slug>[#anchor]|search <query>]
 description: Load Claude Code documentation into context using the local docs CLI tool
 ---
@@ -10,7 +10,7 @@ This command loads official Claude Code documentation into the conversation cont
 
 ## Available Documentation Sections
 
-!`claude-expert/scripts/claude-docs.sh list`
+!`claude-docs list`
 
 ## Your Task
 
@@ -66,9 +66,9 @@ First, analyze the request to understand what topic the user wants:
 
 1. **For topic-based requests**, load full documents with `get <slug>`:
    ```bash
-   !claude-expert/scripts/claude-docs.sh get plugins
-   !claude-expert/scripts/claude-docs.sh get plugin-marketplaces
-   !claude-expert/scripts/claude-docs.sh get plugins-reference
+   !claude-docs get plugins
+   !claude-docs get plugin-marketplaces
+   !claude-docs get plugins-reference
    ```
 
 2. **Evaluate if you have enough** - The full documents include ALL their sections
@@ -81,17 +81,17 @@ First, analyze the request to understand what topic the user wants:
 **For exact command syntax:**
 
 - **`list`** → Already shown above, just reference it
-- **`list <slug>`** → Show TOC: `!claude-expert/scripts/claude-docs.sh list <slug>`
-- **`get <slug>`** → Load full doc: `!claude-expert/scripts/claude-docs.sh get '<slug>'`
-- **`get <slug>#<anchor>`** → Only if specifically requested: `!claude-expert/scripts/claude-docs.sh get '<slug>#<anchor>'`
-- **`search <query>`** → Search all docs: `!claude-expert/scripts/claude-docs.sh search '<query>'`
+- **`list <slug>`** → Show TOC: `!claude-docs list <slug>`
+- **`get <slug>`** → Load full doc: `!claude-docs get '<slug>'`
+- **`get <slug>#<anchor>`** → Only if specifically requested: `!claude-docs get '<slug>#<anchor>'`
+- **`search <query>`** → Search all docs: `!claude-docs search '<query>'`
 
 **Example workflow for "plugins" topic:**
 ```bash
 # Load all full documents (includes all sections)
-!claude-expert/scripts/claude-docs.sh get plugins
-!claude-expert/scripts/claude-docs.sh get plugin-marketplaces
-!claude-expert/scripts/claude-docs.sh get plugins-reference
+!claude-docs get plugins
+!claude-docs get plugin-marketplaces
+!claude-docs get plugins-reference
 
 # That's it! All sections are now loaded. No need for anchors.
 ```
@@ -110,7 +110,7 @@ After loading documentation, clearly state:
 3. **Avoid unnecessary anchors** - Only use `get <slug>#<anchor>` when specifically requested
 4. **Read-only mode** - Only load docs, no code changes
 5. **Be comprehensive** - When in doubt, load more full documents rather than less
-6. **Tool reference** - Always use full path: `claude-expert/scripts/claude-docs.sh`
+6. **Tool reference** - Always use full path: `claude-docs`
 
 ### Example Responses:
 
@@ -120,9 +120,9 @@ After loading documentation, clearly state:
 2. Find ALL related slugs: `plugins`, `plugin-marketplaces`, `plugins-reference`
 3. Load all three FULL documents (no anchors needed):
    ```bash
-   !claude-expert/scripts/claude-docs.sh get plugins
-   !claude-expert/scripts/claude-docs.sh get plugin-marketplaces
-   !claude-expert/scripts/claude-docs.sh get plugins-reference
+   !claude-docs get plugins
+   !claude-docs get plugin-marketplaces
+   !claude-docs get plugins-reference
    ```
 4. Say: "I've loaded all plugins documentation (3 complete sections). What would you like to know?"
 
@@ -131,7 +131,7 @@ After loading documentation, clearly state:
 1. User specifically requested the quickstart section only
 2. Load just that section:
    ```bash
-   !claude-expert/scripts/claude-docs.sh get 'plugins#quickstart'
+   !claude-docs get 'plugins#quickstart'
    ```
 3. Say: "I've loaded the plugins quickstart section. Would you like the full plugins documentation?"
 
@@ -139,7 +139,7 @@ After loading documentation, clearly state:
 **You should:**
 1. Show the table of contents for hooks:
    ```bash
-   !claude-expert/scripts/claude-docs.sh list hooks
+   !claude-docs list hooks
    ```
 2. Ask: "Here's the hooks documentation structure. Would you like me to load the full documentation?"
 
