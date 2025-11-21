@@ -13,20 +13,26 @@ Create a beautiful HTML report for a session transcript.
 ## Instructions
 
 1. **First, get context to understand the current state:**
-   - Run: !`get-transcript-context.sh`
-   - This shows current session ID, available transcripts, and project status
+
+   !`get-transcript-context.sh`
+
+   This shows current session ID, available transcripts, and project status.
 
 2. **Determine target session:**
-   - If `$ARGUMENTS` is empty or whitespace, use the current session from context
-   - If `$ARGUMENTS` provided, use it as the session ID (can use short form)
+   - If `$ARGUMENTS` is empty or whitespace, use the current session ID from the context output
+   - If `$ARGUMENTS` is provided, use it as the session ID (can use short form like "b061b235")
 
 3. **Generate the HTML report:**
-   - Run: !`transcript-helper.sh create <session-id>`
-   - The helper automatically:
-     - Creates `.transcripts/` folder if needed
-     - Updates `.gitignore` if needed
-     - Generates HTML using render scripts
-     - Returns JSON with output file path
+
+   Run the helper with the determined session ID. For example, if the session is "b061b235":
+
+   !`transcript-helper.sh create b061b235`
+
+   The helper automatically:
+   - Creates `.transcripts/` folder if needed
+   - Updates `.gitignore` if needed
+   - Generates HTML using render scripts
+   - Returns JSON with output file path
 
 4. **Report success:**
    - Parse the JSON output from transcript-helper.sh
