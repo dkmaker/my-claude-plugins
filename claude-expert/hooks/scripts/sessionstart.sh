@@ -89,13 +89,10 @@ set_env_var() {
     return 0
 }
 
-# Add the scripts folder to PATH and other environment variables
+# Set environment variables
 if [ -n "$CLAUDE_ENV_FILE" ]; then
-    debug_log ""D
+    debug_log ""
     debug_log "Setting environment variables in CLAUDE_ENV_FILE..."
-
-    # Set PATH with the scripts folder
-    set_env_var "PATH" "${CLAUDE_PLUGIN_ROOT}/scripts:\$PATH"
 
     # Set CLAUDE_SESSION_ID
     set_env_var "CLAUDE_SESSION_ID" "$CLAUDE_SESSION_ID"
@@ -121,6 +118,27 @@ debug_log ""
 
 INSTALL_STATUS=""
 INSTALL_ERROR=""
+LAST_UPDATE_CHECK_FILE="$CLAUDE_HOME/.claude-docs-last-check"
+UPDATE_CHECK_INTERVAL_HOURS=24
+
+# Function to check if we should run update check (throttling)
+should_check_updates() {
+    if [[ ! -f "$LAST_UPDATE_CHECK_FILE" ]]; then
+        return 0  # First run
+    fi
+
+    local last_check
+    last_check=$(cat "$LAST_UPDATE_CHECK_FILE" 2>/dev/null || echo "0")
+    local now=$(date +%s)
+    local age=$((now - last_check))
+    local hours=$((age / 3600))
+
+    if [[ $hours -lt $UPDATE_CHECK_INTERVAL_HOURS ]]; then
+        return 1  # Too soon
+    fi
+
+    return 0  # Time to check
+}
 
 # Check if claude-docs is installed
 if command -v claude-docs &>/dev/null; then
@@ -130,30 +148,42 @@ if command -v claude-docs &>/dev/null; then
     LOCAL_VERSION=$(claude-docs --version 2>/dev/null | tr -d '[:space:]')
     debug_log "Local version: $LOCAL_VERSION"
 
-    # Check GitHub for latest version (with timeout)
-    GITHUB_VERSION=$(curl -s --max-time 5 https://api.github.com/repos/dkmaker/claude-docs-cli/releases/latest 2>/dev/null | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | tr -d 'v' | tr -d '[:space:]')
+    # Only check for updates if throttle allows
+    if should_check_updates; then
+        debug_log "Checking for updates (last check > 24h ago)..."
 
-    if [ -n "$GITHUB_VERSION" ] && [ "$LOCAL_VERSION" != "$GITHUB_VERSION" ]; then
-        debug_log "Update available: $LOCAL_VERSION -> $GITHUB_VERSION"
-        debug_log "Attempting to update..."
+        # Check GitHub for latest version (with timeout)
+        GITHUB_VERSION=$(curl -s --max-time 5 https://api.github.com/repos/dkmaker/claude-docs-cli/releases/latest 2>/dev/null | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/' | tr -d 'v' | tr -d '[:space:]')
 
-        # Get download URL
-        DOWNLOAD_URL=$(curl -s --max-time 5 https://api.github.com/repos/dkmaker/claude-docs-cli/releases/latest 2>/dev/null | grep "browser_download_url.*tgz" | cut -d '"' -f 4)
+        if [ -n "$GITHUB_VERSION" ] && [ "$LOCAL_VERSION" != "$GITHUB_VERSION" ]; then
+            debug_log "Update available: $LOCAL_VERSION -> $GITHUB_VERSION"
+            debug_log "Attempting to update..."
 
-        if [ -n "$DOWNLOAD_URL" ]; then
-            # Attempt update in background to avoid blocking
-            if npm install -g "$DOWNLOAD_URL" &>/dev/null; then
-                INSTALL_STATUS="✅ Updated claude-docs: $LOCAL_VERSION → $GITHUB_VERSION"
-                debug_log "✓ Update successful"
+            # Get download URL
+            DOWNLOAD_URL=$(curl -s --max-time 5 https://api.github.com/repos/dkmaker/claude-docs-cli/releases/latest 2>/dev/null | grep "browser_download_url.*tgz" | cut -d '"' -f 4)
+
+            if [ -n "$DOWNLOAD_URL" ]; then
+                # Attempt update
+                if npm install -g "$DOWNLOAD_URL" &>/dev/null; then
+                    NEW_VERSION=$(claude-docs --version 2>/dev/null | tr -d '[:space:]')
+                    INSTALL_STATUS="✅ Updated claude-docs: $LOCAL_VERSION → $NEW_VERSION"
+                    debug_log "✓ Update successful"
+                    # Update check timestamp on success
+                    date +%s > "$LAST_UPDATE_CHECK_FILE"
+                else
+                    INSTALL_STATUS="⚠️ Failed to update claude-docs (currently running v$LOCAL_VERSION)"
+                    debug_log "✗ Update failed"
+                fi
             else
-                INSTALL_STATUS="⚠️ Failed to update claude-docs (currently running v$LOCAL_VERSION)"
-                debug_log "✗ Update failed"
+                debug_log "Could not fetch download URL"
             fi
         else
-            debug_log "Could not fetch download URL"
+            debug_log "claude-docs is up to date (v$LOCAL_VERSION)"
+            # Update check timestamp
+            date +%s > "$LAST_UPDATE_CHECK_FILE"
         fi
     else
-        debug_log "claude-docs is up to date or version check failed"
+        debug_log "Skipping update check (checked within last 24h)"
     fi
 else
     debug_log "✗ claude-docs is not installed"
@@ -170,6 +200,8 @@ else
             INSTALLED_VERSION=$(claude-docs --version 2>/dev/null | tr -d '[:space:]')
             INSTALL_STATUS="✅ Installed claude-docs v$INSTALLED_VERSION"
             debug_log "✓ Installation successful: v$INSTALLED_VERSION"
+            # Set initial check timestamp
+            date +%s > "$LAST_UPDATE_CHECK_FILE"
         else
             INSTALL_ERROR="⚠️ Failed to install claude-docs CLI"
             debug_log "✗ Installation failed"

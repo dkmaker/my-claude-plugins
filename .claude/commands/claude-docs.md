@@ -6,7 +6,7 @@ description: Load Claude Code documentation into context using the local docs CL
 
 # Claude Documentation Loader
 
-This command loads official Claude Code documentation into the conversation context using the local `claude-docs.sh` CLI tool.
+This command loads official Claude Code documentation into the conversation context using the globally installed `claude-docs` CLI tool.
 
 ## Available Documentation Sections
 

@@ -39,9 +39,9 @@ This is a Claude Code plugin marketplace containing multiple plugins for enhanci
 - Can specify allowed tools (restrict Claude to specific commands)
 - Example: claude-expert docs skill loads documentation via CLI
 
-**Scripts** (`scripts/`):
+**Scripts** (optional):
 - Standalone CLI tools called by hooks or skills
-- Example: claude-docs.sh manages documentation database with caching
+- Note: claude-expert plugin uses globally installed `claude-docs` CLI (Node.js)
 
 **Statusline** (`statusline.sh`):
 - Custom status line script showing model info, version, and context
@@ -103,14 +103,16 @@ Hooks must output valid JSON to stdout. Required structure:
 }
 ```
 
-### Documentation CLI (`claude-expert/scripts/claude-docs.sh`)
+### Documentation CLI (`claude-docs`)
 
-The claude-docs.sh tool manages a local documentation database:
+The claude-docs tool (Node.js) manages a local documentation database:
+- Automatically installed/updated from GitHub releases by sessionstart.sh hook
 - Downloads MDX from official Claude Code docs
 - Transforms JSX/MDX to clean markdown (strips React components)
-- Caches processed markdown (10-38x performance improvement)
-- Supports: `list`, `get <slug>`, `search <query>`, `update` commands
-- Stores docs in `~/.claude/docs/` with metadata in `.cache/` and `.diffs/`
+- Caches processed markdown for fast access
+- Supports: `list`, `get <slug>`, `search <query>`, `update`, `cache` commands
+- Stores docs in `~/.claude/docs/`
+- Installed globally via npm from GitHub releases
 
 ### Baseline Settings Management (`baseline/hooks/scripts/baseline-check.sh`)
 
@@ -143,7 +145,7 @@ Main branch: `main`
 
 - `.claude-plugin/marketplace.json` - Marketplace registry
 - `baseline/hooks/scripts/baseline-check.sh` - Settings validation and enforcement
-- `claude-expert/scripts/claude-docs.sh` - Documentation management system
+- `claude-expert/hooks/scripts/sessionstart.sh` - CLI installation and update management
 - `claude-expert/skills/docs/SKILL.md` - Skill definition with documentation loading logic
 - `.claude/commands/claude-docs.md` - Slash command for manual documentation access
 

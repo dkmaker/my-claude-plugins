@@ -25,8 +25,8 @@ This repository contains:
 - Intelligent search across all documentation
 - MDX transformation pipeline (converts JSX/MDX to clean markdown)
 - Smart caching system (10-38x performance improvement)
-- Update workflow for keeping documentation current
-- Built-in `claude-docs.sh` CLI tool for documentation management
+- Automatic installation and updates from GitHub releases
+- Built-in `claude-docs` Node.js CLI for documentation management
 
 **See:** [claude-expert/README.md](claude-expert/README.md) for detailed documentation.
 
@@ -129,10 +129,7 @@ claude-plugins/
 │   ├── hooks/
 │   │   ├── hooks.json            # Hook configuration
 │   │   └── scripts/
-│   │       └── sessionstart.sh   # Session initialization script
-│   ├── scripts/
-│   │   ├── claude-docs.sh        # Documentation CLI tool
-│   │   └── claude-docs-urls.json # Documentation URLs
+│   │       └── sessionstart.sh   # Session initialization script (manages CLI)
 │   └── skills/
 │       └── docs/
 │           └── SKILL.md          # Skill definition
@@ -175,20 +172,20 @@ Ask Claude Code questions about itself, and the Claude Expert plugin will automa
 You can also use the documentation CLI tool directly:
 
 ```bash
-# Navigate to plugin directory
-cd ~/.claude/plugins/my-claude-plugins/claude-expert/scripts/
-
 # Search documentation
-./claude-docs.sh search 'oauth'
+claude-docs search 'oauth'
 
 # Get full documentation section
-./claude-docs.sh get plugins
+claude-docs get plugins
 
 # List all available docs
-./claude-docs.sh list
+claude-docs list
 
 # Check for documentation updates
-./claude-docs.sh update status
+claude-docs update
+
+# Check version
+claude-docs --version
 ```
 
 See [claude-expert/README.md](claude-expert/README.md) for complete CLI documentation.
