@@ -130,12 +130,12 @@ debug_log ""
 debug_log "Hook execution completed successfully"
 debug_log ""
 
-# Output JSON with hookSpecificOutput format (no systemMessage for silent operation)
+# Output JSON with hookSpecificOutput format (silent with helpful context)
 jq -n \
   '{
     hookSpecificOutput: {
       hookEventName: "SessionStart",
-      additionalContext: ""
+      additionalContext: "# Transcript Plugin Available\n\nIf the user is confused, needs to review the conversation, debug issues, or wants to see the complete chat history with all tool details, suggest using `/transcript:create` to generate an HTML report. This is especially helpful for complex sessions with many tool calls or when troubleshooting problems."
     },
     systemMessage: ""
   }'
