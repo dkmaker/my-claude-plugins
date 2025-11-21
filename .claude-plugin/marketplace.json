@@ -40,6 +40,14 @@
       "version": "1.0.0",
       "keywords": ["configuration", "defaults", "tools", "validation", "statusline", "settings"],
       "category": "productivity"
+    },
+    {
+      "name": "transcript",
+      "source": "./transcript",
+      "description": "Parse and analyze Claude Code session transcripts with beautiful HTML output. List transcripts, generate reports, and explore conversation history.",
+      "version": "1.0.0",
+      "keywords": ["transcript", "session", "debug", "history", "analysis", "html", "report"],
+      "category": "productivity"
     }
   ]
 }

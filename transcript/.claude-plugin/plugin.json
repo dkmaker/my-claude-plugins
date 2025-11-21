@@ -1,0 +1,9 @@
+{
+  "name": "transcript",
+  "version": "1.0.0",
+  "description": "Parse and analyze Claude Code session transcripts with markdown/HTML output",
+  "author": {
+    "name": "Claude Plugins"
+  },
+  "keywords": ["transcript", "session", "debug", "history", "analysis"]
+}
