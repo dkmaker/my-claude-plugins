@@ -166,7 +166,20 @@ cmd_create() {
 
     # Get actual session ID from transcript filename
     local actual_session=$(basename "$transcript_file" .jsonl)
-    local output_file="${output_dir}/${actual_session}.html"
+
+    # Generate human-friendly filename: transcript-<session-short>-<project>-<timestamp>.html
+    # Extract project folder name (last component of path)
+    local project_name=$(basename "$PROJECT_ROOT")
+
+    # Get short session ID (first 8 characters)
+    local session_short="${actual_session:0:8}"
+
+    # Get current timestamp in format: YYYYMMDD-HHMMSS
+    local timestamp=$(date +%Y%m%d-%H%M%S)
+
+    # Create filename: transcript-sessionid-projectname-timestamp.html
+    local friendly_filename="transcript-${session_short}-${project_name}-${timestamp}.html"
+    local output_file="${output_dir}/${friendly_filename}"
 
     # Generate HTML report using render script
     if ! "$SCRIPT_DIR/render-html-js.sh" "$transcript_file" > "$output_file"; then
@@ -182,7 +195,8 @@ cmd_create() {
   "short_id": "${actual_session:0:8}",
   "transcript_file": "$transcript_file",
   "output_file": "$output_file",
-  "relative_path": ".transcripts/${actual_session}.html"
+  "relative_path": ".transcripts/${friendly_filename}",
+  "friendly_filename": "${friendly_filename}"
 }
 EOF
 }

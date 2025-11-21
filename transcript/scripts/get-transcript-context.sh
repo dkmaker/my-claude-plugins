@@ -168,20 +168,18 @@ if [ -d "$TRANSCRIPTS_OUTPUT_DIR" ]; then
     if [ ${#reports[@]} -gt 0 ]; then
         echo "  Found ${#reports[@]} HTML report(s):"
         echo ""
-        echo "  ${BOLD}Session ID (short)    Size     Modified              File${NC}"
-        echo "  ────────────────────  ───────  ────────────────────  ────────────────────────────────"
+        echo "  ${BOLD}Filename                                        Size     Modified${NC}"
+        echo "  ──────────────────────────────────────────────  ───────  ────────────────────"
 
         for report in "${reports[@]}"; do
-            report_basename=$(basename "$report" .html)
-            short_id="${report_basename:0:20}"
+            report_name=$(basename "$report")
             size=$(du -h "$report" | cut -f1)
             modified=$(stat -c %y "$report" 2>/dev/null | cut -d'.' -f1 || echo "unknown")
 
-            printf "  %-20s  %7s  %s  %s\n" \
-                "$short_id" \
+            printf "  %-46s  %7s  %s\n" \
+                "$report_name" \
                 "$size" \
-                "$modified" \
-                "$(basename "$report")"
+                "$modified"
         done
     else
         echo -e "  ${YELLOW}No HTML reports generated yet${NC}"
