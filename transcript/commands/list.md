@@ -20,16 +20,20 @@ Present the information in a user-friendly format. Use this template:
 
 ## Available Sessions
 
-You have **<total count>** conversation sessions in this project. Here are the most recent:
+You have **<total count>** conversation sessions in this project. Here are the most recent (showing last 10):
 
-<Display the transcript table from context output>
+<Display the transcript table from context output showing: ID, Date/Time, Age, Branch, Messages>
+
+The "Age" column shows how long ago the session was last updated, making it easy to find recent work.
 
 ## Generated Reports
 
 <If reports exist>
 You've already created **<count>** HTML report(s):
 
-<Display the reports table from context output>
+<Display the reports table from context output showing: Filename, Size, Age, Modified>
+
+The "Age" column shows when each report was created, helping you identify the most recent ones.
 
 <If no reports>
 No reports generated yet. Run `/transcript:create` to create one!

@@ -90,8 +90,8 @@ if [ -n "$CURRENT_TRANSCRIPT" ]; then
         if [ ${#transcripts[@]} -gt 0 ]; then
             echo "  Found ${#transcripts[@]} transcript(s) in: $TRANSCRIPT_DIR"
             echo ""
-            echo "  ${BOLD}ID (short)    Date/Time            Branch       Messages  File${NC}"
-            echo "  ────────────  ───────────────────  ───────────  ────────  ────────────────────────────────"
+            echo "  ${BOLD}ID (short)    Date/Time            Age          Branch       Messages${NC}"
+            echo "  ────────────  ───────────────────  ───────────  ───────────  ────────"
 
             # Limit to last 10 transcripts
             start_index=$((${#transcripts[@]} - 10))
@@ -115,6 +115,25 @@ if [ -n "$CURRENT_TRANSCRIPT" ]; then
                     formatted_date=$(date -d "$started_at" "+%Y-%m-%d %H:%M" 2>/dev/null || echo "$started_at")
                 fi
 
+                # Calculate age based on file modification time
+                file_age="unknown"
+                if [ -f "$transcript" ]; then
+                    file_mtime=$(stat -c %Y "$transcript" 2>/dev/null || stat -f %m "$transcript" 2>/dev/null)
+                    current_time=$(date +%s)
+                    age_seconds=$((current_time - file_mtime))
+
+                    # Format age in human-readable form
+                    if [ $age_seconds -lt 60 ]; then
+                        file_age="${age_seconds}s ago"
+                    elif [ $age_seconds -lt 3600 ]; then
+                        file_age="$((age_seconds / 60))m ago"
+                    elif [ $age_seconds -lt 86400 ]; then
+                        file_age="$((age_seconds / 3600))h ago"
+                    else
+                        file_age="$((age_seconds / 86400))d ago"
+                    fi
+                fi
+
                 # Format branch
                 formatted_branch="${branch:-unknown}"
                 if [ ${#formatted_branch} -gt 11 ]; then
@@ -129,12 +148,12 @@ if [ -n "$CURRENT_TRANSCRIPT" ]; then
                     marker="  "
                 fi
 
-                printf "  ${marker}%-12s  %-19s  %-11s  %8s  %s\n" \
+                printf "  ${marker}%-12s  %-19s  %-11s  %-11s  %8s\n" \
                     "$short_id" \
                     "$formatted_date" \
+                    "$file_age" \
                     "$formatted_branch" \
-                    "${msg_count:-0}" \
-                    "$(basename "$transcript")"
+                    "${msg_count:-0}"
             done
         else
             echo -e "  ${YELLOW}No transcripts found in: $TRANSCRIPT_DIR${NC}"
@@ -168,17 +187,37 @@ if [ -d "$TRANSCRIPTS_OUTPUT_DIR" ]; then
     if [ ${#reports[@]} -gt 0 ]; then
         echo "  Found ${#reports[@]} HTML report(s):"
         echo ""
-        echo "  ${BOLD}Filename                                        Size     Modified${NC}"
-        echo "  ──────────────────────────────────────────────  ───────  ────────────────────"
+        echo "  ${BOLD}Filename                                        Size     Age          Modified${NC}"
+        echo "  ──────────────────────────────────────────────  ───────  ───────────  ────────────────────"
 
         for report in "${reports[@]}"; do
             report_name=$(basename "$report")
             size=$(du -h "$report" | cut -f1)
             modified=$(stat -c %y "$report" 2>/dev/null | cut -d'.' -f1 || echo "unknown")
 
-            printf "  %-46s  %7s  %s\n" \
+            # Calculate age
+            report_age="unknown"
+            if [ -f "$report" ]; then
+                file_mtime=$(stat -c %Y "$report" 2>/dev/null || stat -f %m "$report" 2>/dev/null)
+                current_time=$(date +%s)
+                age_seconds=$((current_time - file_mtime))
+
+                # Format age in human-readable form
+                if [ $age_seconds -lt 60 ]; then
+                    report_age="${age_seconds}s ago"
+                elif [ $age_seconds -lt 3600 ]; then
+                    report_age="$((age_seconds / 60))m ago"
+                elif [ $age_seconds -lt 86400 ]; then
+                    report_age="$((age_seconds / 3600))h ago"
+                else
+                    report_age="$((age_seconds / 86400))d ago"
+                fi
+            fi
+
+            printf "  %-46s  %7s  %-11s  %s\n" \
                 "$report_name" \
                 "$size" \
+                "$report_age" \
                 "$modified"
         done
     else
