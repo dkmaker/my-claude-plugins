@@ -21,22 +21,30 @@ Create a beautiful HTML report for a session transcript.
    This shows current session ID, available transcripts, and project status.
 
 2. **Determine which session to use:**
-   - If the user provided no arguments, use the current session ID from the context output
-   - If the user provided a session ID, use that (can be short form)
+   - If the user provided no arguments, use the current session ID (short form) from the context output
+   - If the user provided a session ID, use exactly what they provided
 
-3. **Generate the HTML report:**
+3. **Verify .gitignore protection (CRITICAL - transcripts may contain sensitive data):**
 
-   Run the helper with the determined session ID. For example, if the session is "b061b235":
+   Check the .gitignore status from step 1 context output:
+   - If it shows "✓ .transcripts/ is in .gitignore" → Safe to proceed
+   - If it shows anything else → Warn the user that .gitignore needs to be configured first
 
-   !`transcript-helper.sh create b061b235`
+   The helper will add .gitignore automatically, but inform the user this is happening.
 
-   The helper automatically:
-   - Creates `.transcripts/` folder if needed
-   - Updates `.gitignore` if needed
-   - Generates HTML using render scripts
-   - Returns JSON with output file path
+4. **Generate the HTML report:**
 
-4. **Report success to the user:**
+   Construct and run the helper command with the actual session ID from step 2.
+
+   Build the command: `transcript-helper.sh create <session-id-from-step-2>`
+
+   Then execute it with the bash invocation prefix to get the JSON response.
+
+   Important: Use the ACTUAL session ID determined in step 2, not a placeholder or example.
+
+   Parse the JSON response for the output file information.
+
+5. **Report success to the user:**
 
    Present the information in a user-friendly way. Use this template:
 
