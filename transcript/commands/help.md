@@ -2,87 +2,84 @@
 description: Show transcript plugin usage guide and available commands
 ---
 
-# Transcript Plugin Help
+# Transcript Plugin - User Guide
 
-## Available Commands
+The transcript plugin helps you review and analyze your Claude Code conversations by creating beautiful, interactive HTML reports.
 
-### `/transcript:help`
-Show this help guide with usage information.
+## Why Use Transcripts?
 
-### `/transcript:list`
-List all available transcripts in the current project.
+- **Review your work** - See exactly what you and Claude discussed and accomplished
+- **Share with team** - Export conversations as HTML to share insights with colleagues
+- **Learn from sessions** - Study successful prompts and Claude's problem-solving approaches
+- **Debug issues** - Review tool calls and outputs when troubleshooting
+- **Track progress** - Keep a record of your project's development history
 
-**Shows:**
-- Session ID (short form - first 8 characters)
-- Date and time started
-- Git branch
-- Total message count
-- File location
+## Quick Start
 
-**Usage:**
+**View your conversations:**
 ```
 /transcript:list
 ```
+See all available sessions in your project with dates and message counts.
 
-### `/transcript:create [session-id]`
-Create an HTML report for a transcript session.
-
-**Without arguments** - Creates report for current session:
+**Create a report for what you're working on now:**
 ```
 /transcript:create
 ```
+Instantly generates an HTML file you can open in your browser.
 
-**With session ID** - Creates report for specific session (use first 8 characters):
+**Create a report from an older session:**
 ```
-/transcript:create 97f85a57
+/transcript:create b061b235
 ```
+Use the session ID from the list command (first 8 characters).
 
-**Output:** `.transcripts/<session-id>.html`
+## What You Get
 
-**Features:**
-- Automatically creates `.transcripts/` folder if needed
-- Adds `.transcripts/` to `.gitignore` automatically
-- Beautiful styled HTML with interactive elements
-- Expandable tool details
-- Message statistics and token usage
-- Keyboard shortcuts (press E to toggle all tools)
+Your HTML reports include:
 
-## Environment Variables
+- **Full conversation** - Every message, exactly as it happened
+- **Tool usage** - See what commands Claude ran and their results
+- **Statistics** - Message counts, token usage, and performance metrics
+- **Interactive viewing** - Click to expand/collapse sections for easier reading
+- **Easy navigation** - Jump through your conversation quickly
 
-The plugin's SessionStart hook sets these environment variables for use in bash commands:
+## Tips for Best Results
 
-- `CLAUDE_ACTIVE_TRANSCRIPT` - Path to current session transcript file
-- `CLAUDE_SESSION_ID` - Current session ID (full UUID)
-- `CLAUDE_PROJECT_ROOT` - Project root directory
+**Reviewing long sessions:**
+- Press the `E` key to expand/collapse all tool details at once
+- Click individual tool cards to see specific command details
+- Long messages are automatically collapsed - click "Show more" to expand
 
-## Examples
+**Finding specific sessions:**
+- Use `/transcript:list` to see your sessions sorted by date
+- Session filenames include project name and timestamp for easy identification
+- Reports are saved in `.transcripts/` folder (automatically excluded from git)
 
-**List transcripts:**
-```
-/transcript:list
-```
+**Sharing reports:**
+- HTML files are self-contained - just send the file
+- No internet connection needed to view
+- Opens in any modern web browser
 
-**Create report for current session:**
-```
-/transcript:create
-```
+## Common Questions
 
-**Create report for specific session:**
-```
-/transcript:create 97f85a57
-```
+**Where are my reports saved?**
+- In `.transcripts/` folder in your project root
+- Filename format: `transcript-<session>-<project>-<date>.html`
+- Example: `transcript-b061b235-claude-plugins-20251121-154455.html`
 
-## Troubleshooting
+**How do I open a report?**
+- Double-click the HTML file in your file manager
+- Or: `open .transcripts/transcript-*.html` (macOS)
+- Or: `xdg-open .transcripts/transcript-*.html` (Linux)
 
-**Commands not found?**
-- Make sure the plugin is installed: `/plugin install transcript@claude-plugins`
-- Restart Claude Code after installation
+**Can I delete old reports?**
+- Yes! They're just HTML files. Delete any you don't need.
+- The original transcripts are kept by Claude Code separately
 
-**Environment variables empty?**
-- Check with: `!echo $CLAUDE_ACTIVE_TRANSCRIPT`
-- Reinstall the plugin and restart Claude Code
+**How do I find a specific conversation?**
+- Run `/transcript:list` to see all sessions with dates
+- Reports are named with project and timestamp for easy sorting
+- Use your file manager to search by date or project name
 
-**Permission errors?**
-- Ensure scripts are executable: `chmod +x transcript/scripts/*.sh`
-
-For more information, see the plugin README.
+Need more help? The reports themselves are self-explanatory once you open them!

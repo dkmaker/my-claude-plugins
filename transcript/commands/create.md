@@ -34,14 +34,50 @@ Create a beautiful HTML report for a session transcript.
    - Generates HTML using render scripts
    - Returns JSON with output file path
 
-4. **Report success:**
-   - Parse the JSON output from transcript-helper.sh
-   - Show the user the output file path
-   - Mention they can open it in a browser
-   - Remind them about features:
-     - Press `E` to toggle all tools open/closed
-     - Expandable tool details
-     - Smart truncation for long messages
-     - Dark theme optimized for reading
+4. **Report success to the user:**
 
-If any errors occur, explain what went wrong based on the error message.
+   Present the information in a user-friendly way. Use this template:
+
+   ```
+   # ✅ Report Created Successfully!
+
+   Your conversation has been saved to an HTML file you can open in any browser.
+
+   ## File Location
+
+   **Filename:** `<friendly_filename from JSON>`
+   **Full path:** `<output_file from JSON>`
+
+   ## How to View
+
+   Open the file in your browser:
+
+   ```bash
+   # macOS
+   open .transcripts/<friendly_filename>
+
+   # Linux/WSL
+   xdg-open .transcripts/<friendly_filename>
+
+   # Or just double-click the file in your file manager
+   ```
+
+   ## What's Inside
+
+   Your report includes:
+   - The complete conversation with all messages
+   - Every tool Claude used and their results
+   - Statistics about token usage and performance
+   - Interactive elements for easy navigation
+
+   ## Tips for Viewing
+
+   - **Press `E` key** to expand/collapse all tools at once
+   - **Click tool cards** to see individual command details
+   - **Long messages** are collapsed - click "Show more" to expand them
+   - **Self-contained** - works offline, no internet needed
+
+   The report is ready to view or share!
+   ```
+
+If any errors occur, explain what went wrong in simple terms and suggest how to fix it.
