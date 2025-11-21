@@ -9,6 +9,8 @@ allowed-tools: Bash(get-transcript-context.sh:*), Bash(transcript-helper.sh:*)
 Create a beautiful HTML report for a session transcript.
 
 **Arguments:** `$ARGUMENTS`
+- If empty: Creates report for the current session
+- If provided: Session ID (short form like "b061b235" or full UUID)
 
 ## Instructions
 
@@ -18,9 +20,9 @@ Create a beautiful HTML report for a session transcript.
 
    This shows current session ID, available transcripts, and project status.
 
-2. **Determine target session:**
-   - If `$ARGUMENTS` is empty or whitespace, use the current session ID from the context output
-   - If `$ARGUMENTS` is provided, use it as the session ID (can use short form like "b061b235")
+2. **Determine which session to use:**
+   - If the user provided no arguments, use the current session ID from the context output
+   - If the user provided a session ID, use that (can be short form)
 
 3. **Generate the HTML report:**
 
