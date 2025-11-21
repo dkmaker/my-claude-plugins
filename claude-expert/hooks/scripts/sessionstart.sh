@@ -278,7 +278,11 @@ EOF
 )
 
 # Build system message with installation status
-SYSTEM_MESSAGE="✅ Claude Code Expert plugin loaded"
+# Always show installed version
+INSTALLED_VERSION=$(command -v claude-docs &>/dev/null && claude-docs --version 2>/dev/null | tr -d '[:space:]' || echo "not installed")
+SYSTEM_MESSAGE="
+✅ Claude Code Expert plugin loaded
+📚 claude-docs v${INSTALLED_VERSION}"
 
 if [ -n "$INSTALL_STATUS" ]; then
     SYSTEM_MESSAGE="${SYSTEM_MESSAGE}
