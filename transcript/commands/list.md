@@ -1,19 +1,23 @@
 ---
 description: List all available transcripts in the current project
-allowed-tools: Bash(transcript-helper.sh:*)
+allowed-tools: Bash(get-transcript-context.sh:*)
 ---
 
 # List Transcripts
 
-Use the transcript helper script to list all available transcripts for this project:
+Use the context script to show all available transcripts:
 
-!`transcript-helper.sh list`
+!`get-transcript-context.sh`
 
-Analyze the output and present it to the user in a clear, formatted table showing:
-- Session ID (short form)
-- Date/Time
-- Git branch
-- Message count
-- File path (relative to project root)
+The script shows comprehensive information including:
+- Current session details
+- Project configuration
+- Available transcripts (last 10 shown)
+- Generated HTML reports
+- .gitignore status
 
-If there are no transcripts, inform the user that no transcript sessions were found for this project.
+Review the output and provide a brief summary to the user, highlighting:
+- How many total transcripts are available
+- The current session ID
+- How many HTML reports have been generated
+- Whether they're ready to create new reports

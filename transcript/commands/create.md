@@ -1,7 +1,7 @@
 ---
 description: Create an HTML report for a transcript session
 argument-hint: [session-id]
-allowed-tools: Bash(transcript-helper.sh:*), Bash(mkdir:*), Bash(grep:*), Bash(echo:*), Write
+allowed-tools: Bash(get-transcript-context.sh:*), Bash(transcript-helper.sh:*)
 ---
 
 # Create Transcript Report
@@ -12,32 +12,30 @@ Create a beautiful HTML report for a session transcript.
 
 ## Instructions
 
-Use the transcript helper to create an HTML report:
-
-1. **Get context and validate session:**
-   - Run: !`transcript-helper.sh context`
-   - This provides current session ID, project root, and validates arguments
+1. **First, get context to understand the current state:**
+   - Run: !`get-transcript-context.sh`
+   - This shows current session ID, available transcripts, and project status
 
 2. **Determine target session:**
-   - If `$ARGUMENTS` is empty or whitespace, use current session (from `CLAUDE_SESSION_ID`)
-   - If `$ARGUMENTS` provided, use it as the session ID (first 8 characters)
-   - Validate the session exists using the helper output
+   - If `$ARGUMENTS` is empty or whitespace, use the current session from context
+   - If `$ARGUMENTS` provided, use it as the session ID (can use short form)
 
-3. **Create output directory:**
-   - Ensure `.transcripts/` folder exists in project root
-   - Create it if missing: `mkdir -p .transcripts`
-
-4. **Update .gitignore:**
-   - Check if `.gitignore` contains `.transcripts/`
-   - If not, add it: `echo ".transcripts/" >> .gitignore`
-
-5. **Generate HTML report:**
+3. **Generate the HTML report:**
    - Run: !`transcript-helper.sh create <session-id>`
-   - The helper will generate the HTML and save it to `.transcripts/<session-id>.html`
+   - The helper automatically:
+     - Creates `.transcripts/` folder if needed
+     - Updates `.gitignore` if needed
+     - Generates HTML using render scripts
+     - Returns JSON with output file path
 
-6. **Report success:**
+4. **Report success:**
+   - Parse the JSON output from transcript-helper.sh
    - Show the user the output file path
    - Mention they can open it in a browser
-   - Remind them about keyboard shortcuts (E to toggle tools)
+   - Remind them about features:
+     - Press `E` to toggle all tools open/closed
+     - Expandable tool details
+     - Smart truncation for long messages
+     - Dark theme optimized for reading
 
-If any errors occur, explain what went wrong and suggest solutions.
+If any errors occur, explain what went wrong based on the error message.
