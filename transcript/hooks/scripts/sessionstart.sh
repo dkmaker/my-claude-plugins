@@ -130,14 +130,14 @@ debug_log ""
 debug_log "Hook execution completed successfully"
 debug_log ""
 
-# Output JSON with hookSpecificOutput format
+# Output JSON with hookSpecificOutput format (no systemMessage for silent operation)
 jq -n \
   '{
     hookSpecificOutput: {
       hookEventName: "SessionStart",
       additionalContext: ""
     },
-    systemMessage: "✅ Transcript plugin loaded"
+    systemMessage: ""
   }'
 
 debug_log "JSON output generated successfully"
