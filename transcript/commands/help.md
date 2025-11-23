@@ -1,85 +1,76 @@
 ---
-description: Show transcript plugin usage guide and available commands
+description: Show transcript plugin usage guide
 ---
 
-# Transcript Plugin - User Guide
+# Transcript Plugin - Help
 
-The transcript plugin helps you review and analyze your Claude Code conversations by creating beautiful, interactive HTML reports.
+## What This Plugin Does
 
-## Why Use Transcripts?
+Creates beautiful HTML reports from your current Claude Code conversation.
 
-- **Review your work** - See exactly what you and Claude discussed and accomplished
-- **Share with team** - Export conversations as HTML to share insights with colleagues
-- **Learn from sessions** - Study successful prompts and Claude's problem-solving approaches
-- **Debug issues** - Review tool calls and outputs when troubleshooting
-- **Track progress** - Keep a record of your project's development history
+## Usage
 
-## Quick Start
+Simply run:
 
-**View your conversations:**
-```
-/transcript:list
-```
-See all available sessions in your project with dates and message counts.
-
-**Create a report for what you're working on now:**
 ```
 /transcript:create
 ```
-Instantly generates an HTML file you can open in your browser.
 
-**Create a report from an older session:**
-```
-/transcript:create b061b235
-```
-Use the session ID from the list command (first 8 characters).
+This generates an interactive HTML file in `.transcripts/` that you can open in any browser.
 
 ## What You Get
 
 Your HTML reports include:
 
-- **Full conversation** - Every message, exactly as it happened
-- **Tool usage** - See what commands Claude ran and their results
-- **Statistics** - Message counts, token usage, and performance metrics
-- **Interactive viewing** - Click to expand/collapse sections for easier reading
-- **Easy navigation** - Jump through your conversation quickly
+- 💬 **Complete conversation** - Every message in chronological order
+- 🛠️ **Tool details** - All commands Claude ran with inputs/outputs
+- 📊 **Statistics** - Message counts, token usage, performance metrics
+- 🎨 **Interactive UI** - Click to expand/collapse sections
+- 🌙 **Dark theme** - Easy on the eyes
+- ⌨️ **Keyboard shortcuts** - Press `E` to expand/collapse all tools
 
-## Tips for Best Results
+## How to View Reports
 
-**Reviewing long sessions:**
-- Press the `E` key to expand/collapse all tool details at once
-- Click individual tool cards to see specific command details
-- Long messages are automatically collapsed - click "Show more" to expand
+After creating a report:
 
-**Finding specific sessions:**
-- Use `/transcript:list` to see your sessions sorted by date
-- Session filenames include project name and timestamp for easy identification
-- Reports are saved in `.transcripts/` folder (automatically excluded from git)
+**macOS:**
+```bash
+open .transcripts/transcript-*.html
+```
 
-**Sharing reports:**
-- HTML files are self-contained - just send the file
-- No internet connection needed to view
-- Opens in any modern web browser
+**Linux/WSL:**
+```bash
+xdg-open .transcripts/transcript-*.html
+```
 
-## Common Questions
-
-**Where are my reports saved?**
-- In `.transcripts/` folder in your project root
-- Filename format: `transcript-<session>-<project>-<date>.html`
-- Example: `transcript-b061b235-claude-plugins-20251121-154455.html`
-
-**How do I open a report?**
+**Windows:**
 - Double-click the HTML file in your file manager
-- Or: `open .transcripts/transcript-*.html` (macOS)
-- Or: `xdg-open .transcripts/transcript-*.html` (Linux)
 
-**Can I delete old reports?**
-- Yes! They're just HTML files. Delete any you don't need.
-- The original transcripts are kept by Claude Code separately
+## Want a Different Session?
 
-**How do I find a specific conversation?**
-- Run `/transcript:list` to see all sessions with dates
-- Reports are named with project and timestamp for easy sorting
-- Use your file manager to search by date or project name
+To create a report for a past conversation:
 
-Need more help? The reports themselves are self-explanatory once you open them!
+1. Use `/resume <session-id>` to switch to that session
+2. Run `/transcript:create` again
+3. The report will be created for that session
+
+You can find available session IDs with `/resume` (it shows a list).
+
+## Privacy & Security
+
+- Reports are saved to `.transcripts/`
+- This folder is automatically added to `.gitignore`
+- Your transcripts won't be committed to git
+
+## Pro Tips
+
+**Viewing tips:**
+- Press `E` key in the HTML to expand/collapse all tool details
+- Long messages are auto-collapsed - click "Show more" to expand
+- Reports are self-contained and work offline
+
+**File organization:**
+- Reports are named: `transcript-<session-id>-<project>-<date>.html`
+- Easy to find by date or project name in your file manager
+
+That's it! Simple and focused on your current session.
