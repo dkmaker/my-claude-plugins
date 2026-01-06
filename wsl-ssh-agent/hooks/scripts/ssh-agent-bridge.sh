@@ -207,7 +207,14 @@ if ! pgrep -f "npiperelay.exe.*openssh-ssh-agent" > /dev/null 2>&1; then
     if [[ -n "$WIN_HOME" && -x "$WIN_HOME/.bin/npiperelay.exe" ]]; then
         nohup socat UNIX-LISTEN:"$SSH_AUTH_SOCK",fork \
             EXEC:"$WIN_HOME/.bin/npiperelay.exe -ei -s //./pipe/openssh-ssh-agent",nofork > /dev/null 2>&1 &
+        # Wait briefly for socket to be created
+        sleep 0.3
     fi
+fi
+
+# Verify agent is accessible (silent check)
+if [[ -S "$SSH_AUTH_SOCK" ]]; then
+    ssh-add -l > /dev/null 2>&1 || true
 fi'
 
 # Check if script needs to be created/updated
@@ -223,6 +230,18 @@ fi
 
 BASHRC="$HOME/.bashrc"
 SOURCE_LINE='source ~/.ssh/agent-bridge.sh'
+
+# Check for existing SSH agent configurations that would conflict
+if [[ -f "$BASHRC" ]]; then
+    # Look for other SSH_AUTH_SOCK exports or agent configs (excluding our own)
+    EXISTING_CONFIG=$(grep -n "SSH_AUTH_SOCK\|ssh-agent\|\.agent-bridge" "$BASHRC" 2>/dev/null | grep -v "source ~/.ssh/agent-bridge.sh" | grep -v "# WSL SSH Agent" || true)
+    if [[ -n "$EXISTING_CONFIG" ]]; then
+        output_error \
+            "Existing SSH agent configuration found in ~/.bashrc. Please remove or comment out these lines before using this plugin:\n$EXISTING_CONFIG" \
+            "WSL SSH Agent: Existing SSH config in .bashrc. Remove conflicting lines first."
+        exit 0
+    fi
+fi
 
 if [[ -f "$BASHRC" ]]; then
     if ! grep -qF "$SOURCE_LINE" "$BASHRC"; then
