@@ -48,6 +48,14 @@
       "version": "1.0.0",
       "keywords": ["transcript", "session", "debug", "history", "analysis", "html", "report"],
       "category": "productivity"
+    },
+    {
+      "name": "wsl-ssh-agent",
+      "source": "./wsl-ssh-agent",
+      "description": "Bridges Windows SSH agent to WSL for SSH/SCP/Git operations. Works with 1Password, native Windows OpenSSH, and other SSH agent implementations.",
+      "version": "1.0.0",
+      "keywords": ["wsl", "ssh", "ssh-agent", "1password", "git", "windows"],
+      "category": "productivity"
     }
   ]
 }
