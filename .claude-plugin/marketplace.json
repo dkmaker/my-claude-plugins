@@ -56,6 +56,16 @@
       "version": "1.0.0",
       "keywords": ["wsl", "ssh", "ssh-agent", "1password", "git", "windows"],
       "category": "productivity"
+    },
+    {
+      "name": "mcp-rest-api",
+      "source": {
+        "source": "github",
+        "repo": "dkmaker/mcp-rest-api"
+      },
+      "description": "REST API tester MCP server - test HTTP endpoints directly from Claude Code",
+      "keywords": ["mcp", "rest", "api", "http", "testing", "development"],
+      "category": "productivity"
     }
   ]
 }
