@@ -26,13 +26,16 @@ class AiRenderer extends BaseRenderer {
       case 'help':
         return this.renderHelp();
       case 'curate':
-        return this.renderCurate();
+      case 'save':
+        return this.renderSave();
       case 'create-category':
         return this.renderCreateCategory();
       case 'entry':
         return this.renderEntry();
       case 'delete':
         return this.renderDelete();
+      case 'delete-category':
+        return this.renderDeleteCategory();
       case 'error':
         return this.renderError();
       default:
@@ -55,14 +58,16 @@ class AiRenderer extends BaseRenderer {
     if (saved !== undefined) lines.push(`saved: ${saved}`);
     if (title) lines.push(`title: ${title}`);
 
-    // Show thinking if requested
-    if (this.options.showThinking && thinking) {
-      lines.push('thinking: |');
-      for (const line of thinking.split('\n')) {
-        lines.push(`  ${line}`);
-      }
+    // Add metadata counts
+    const metaCounts = [];
+    if (sources && sources.length > 0) metaCounts.push(`sources: ${sources.length}`);
+    if (examples && examples.length > 0) metaCounts.push(`examples: ${examples.length}`);
+    if (thinking) metaCounts.push('thinking: yes');
+    if (metaCounts.length > 0) {
+      lines.push(`meta: ${metaCounts.join(', ')}`);
     }
 
+    // Always show content
     if (content) {
       lines.push('content: |');
       for (const line of content.split('\n')) {
@@ -70,7 +75,16 @@ class AiRenderer extends BaseRenderer {
       }
     }
 
-    if (examples && examples.length > 0) {
+    // Show thinking only if requested
+    if (this.options.showThinking && thinking) {
+      lines.push('thinking: |');
+      for (const line of thinking.split('\n')) {
+        lines.push(`  ${line}`);
+      }
+    }
+
+    // Show examples only if requested
+    if (this.options.showExamples && examples && examples.length > 0) {
       lines.push('examples:');
       for (const ex of examples) {
         lines.push(`- description: ${ex.description}`);
@@ -82,7 +96,8 @@ class AiRenderer extends BaseRenderer {
       }
     }
 
-    if (sources && sources.length > 0) {
+    // Show sources only if requested
+    if (this.options.showSources && sources && sources.length > 0) {
       lines.push('sources:');
       for (const src of sources) {
         const num = src.number ? `[${src.number}] ` : '';
@@ -116,6 +131,13 @@ class AiRenderer extends BaseRenderer {
       lines.push(`  title: ${(entry.title || entry.query || '-').slice(0, 60)}`);
       lines.push(`  scope: ${entry.scope?.type || 'unknown'}`);
       lines.push(`  created: ${entry.created_at ? entry.created_at.split('T')[0] : '-'}`);
+
+      // Metadata counts
+      if (entry.meta) {
+        if (entry.meta.sources > 0) lines.push(`  sources: ${entry.meta.sources}`);
+        if (entry.meta.examples > 0) lines.push(`  examples: ${entry.meta.examples}`);
+        if (entry.meta.hasThinking) lines.push(`  thinking: yes`);
+      }
     }
 
     return lines.join('\n');
@@ -207,21 +229,22 @@ class AiRenderer extends BaseRenderer {
   }
 
   /**
-   * Render curate confirmation
+   * Render save confirmation (curate)
    */
-  renderCurate() {
+  renderSave() {
     const { success, entry, category, message } = this.data;
     const lines = [];
 
-    lines.push('type: curate');
+    lines.push('type: save');
     lines.push(`success: ${success}`);
 
     if (success) {
       lines.push(`entry_id: ${entry?.id}`);
       lines.push(`category: ${category?.slug}`);
       if (entry?.title) lines.push(`title: ${entry.title}`);
+      lines.push('message: Entry saved to library');
     } else {
-      lines.push(`message: ${message || 'Failed to curate entry'}`);
+      lines.push(`message: ${message || 'Failed to save entry'}`);
     }
 
     return lines.join('\n');
@@ -253,9 +276,14 @@ class AiRenderer extends BaseRenderer {
    * Render single entry view
    */
   renderEntry() {
-    const { entry } = this.data;
+    const { entry, showThinking, showSources, showExamples, cliCommand } = this.data;
     const lines = [];
 
+    // Determine subcommand context
+    const location = entry.location === 'library' ? 'library' : 'drafts';
+    const baseCmd = `${cliCommand || 'research'} ${location} show ${entry.id.slice(0, 8)}`;
+
+    // ALL metadata at top
     lines.push('type: entry');
     lines.push(`id: ${entry.id}`);
     lines.push(`location: ${entry.location || 'unknown'}`);
@@ -266,25 +294,50 @@ class AiRenderer extends BaseRenderer {
     if (entry.title) lines.push(`title: ${entry.title}`);
     lines.push(`scope: ${entry.scope?.type || 'unknown'}`);
     if (entry.scope?.path) lines.push(`path: ${entry.scope.path}`);
+
+    // Examples metadata
+    if (entry.examples && entry.examples.length > 0) {
+      lines.push('examples:');
+      lines.push(`  number: ${entry.examples.length}`);
+      lines.push(`  show_command: ${baseCmd} --examples`);
+    }
+
+    // Sources metadata
+    if (entry.sources && entry.sources.length > 0) {
+      lines.push('sources:');
+      lines.push(`  number: ${entry.sources.length}`);
+      lines.push(`  show_command: ${baseCmd} --sources`);
+    }
+
+    // Thinking metadata
+    if (entry.thinking) {
+      lines.push('thinking:');
+      lines.push(`  exists: true`);
+      lines.push(`  show_command: ${baseCmd} --thinking`);
+    }
+
     lines.push(`created: ${entry.created_at}`);
     if (entry.curated_at) lines.push(`curated: ${entry.curated_at}`);
     if (entry.category_id) lines.push(`category_id: ${entry.category_id}`);
 
-    if (entry.content) {
+    // Show content only if NOT viewing specific sections
+    const viewingSpecificSections = showThinking || showSources || showExamples;
+    if (!viewingSpecificSections && entry.content) {
       lines.push('content: |');
       for (const line of entry.content.split('\n')) {
         lines.push(`  ${line}`);
       }
     }
 
-    if (entry.thinking) {
+    // Appended sections (only if requested)
+    if (showThinking && entry.thinking) {
       lines.push('thinking: |');
       for (const line of entry.thinking.split('\n')) {
         lines.push(`  ${line}`);
       }
     }
 
-    if (entry.examples && entry.examples.length > 0) {
+    if (showExamples && entry.examples && entry.examples.length > 0) {
       lines.push('examples:');
       for (const ex of entry.examples) {
         lines.push(`- description: ${ex.description}`);
@@ -296,7 +349,7 @@ class AiRenderer extends BaseRenderer {
       }
     }
 
-    if (entry.sources && entry.sources.length > 0) {
+    if (showSources && entry.sources && entry.sources.length > 0) {
       lines.push('sources:');
       for (const src of entry.sources) {
         const num = src.number ? `[${src.number}] ` : '';
@@ -320,6 +373,21 @@ class AiRenderer extends BaseRenderer {
     lines.push(`id: ${entry?.id}`);
     if (entry?.title) lines.push(`title: ${entry.title}`);
     lines.push(`location: ${entry?.location || 'unknown'}`);
+
+    return lines.join('\n');
+  }
+
+  /**
+   * Render delete category confirmation
+   */
+  renderDeleteCategory() {
+    const { success, category } = this.data;
+    const lines = [];
+
+    lines.push('type: delete-category');
+    lines.push(`success: ${success}`);
+    lines.push(`id: ${category?.id}`);
+    lines.push(`slug: ${category?.slug}`);
 
     return lines.join('\n');
   }

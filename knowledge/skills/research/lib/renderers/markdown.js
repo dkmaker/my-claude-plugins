@@ -25,13 +25,16 @@ class MarkdownRenderer extends BaseRenderer {
       case 'help':
         return this.renderHelp();
       case 'curate':
-        return this.renderCurate();
+      case 'save':
+        return this.renderSave();
       case 'create-category':
         return this.renderCreateCategory();
       case 'entry':
         return this.renderEntry();
       case 'delete':
         return this.renderDelete();
+      case 'delete-category':
+        return this.renderDeleteCategory();
       case 'error':
         return this.renderError();
       default:
@@ -44,25 +47,41 @@ class MarkdownRenderer extends BaseRenderer {
    * @param {Object} obj - Key-value pairs for frontmatter
    * @returns {string} YAML frontmatter block
    */
-  buildFrontmatter(obj) {
-    const lines = ['---'];
+  buildFrontmatter(obj, indent = 0) {
+    const lines = indent === 0 ? ['---'] : [];
+    const prefix = '  '.repeat(indent);
+
     for (const [key, value] of Object.entries(obj)) {
       if (value !== undefined && value !== null) {
         if (typeof value === 'string') {
           // Escape strings that might break YAML
           if (value.includes(':') || value.includes('#') || value.includes('\n')) {
-            lines.push(`${key}: "${value.replace(/"/g, '\\"')}"`);
+            lines.push(`${prefix}${key}: "${value.replace(/"/g, '\\"')}"`);
           } else {
-            lines.push(`${key}: ${value}`);
+            lines.push(`${prefix}${key}: ${value}`);
           }
         } else if (typeof value === 'boolean' || typeof value === 'number') {
-          lines.push(`${key}: ${value}`);
+          lines.push(`${prefix}${key}: ${value}`);
+        } else if (typeof value === 'object' && !Array.isArray(value)) {
+          // Nested object - render as nested YAML
+          lines.push(`${prefix}${key}:`);
+          for (const [nestedKey, nestedValue] of Object.entries(value)) {
+            const nestedPrefix = '  '.repeat(indent + 1);
+            if (typeof nestedValue === 'string') {
+              lines.push(`${nestedPrefix}${nestedKey}: ${nestedValue}`);
+            } else {
+              lines.push(`${nestedPrefix}${nestedKey}: ${nestedValue}`);
+            }
+          }
         } else {
-          lines.push(`${key}: ${JSON.stringify(value)}`);
+          lines.push(`${prefix}${key}: ${JSON.stringify(value)}`);
         }
       }
     }
-    lines.push('---', '');
+
+    if (indent === 0) {
+      lines.push('---', '');
+    }
     return lines.join('\n');
   }
 
@@ -73,6 +92,12 @@ class MarkdownRenderer extends BaseRenderer {
     const { provider, model, profile, tokens, saved, title, content, thinking, examples, sources } = this.data;
     const parts = [];
 
+    // Build metadata counts
+    const meta = [];
+    if (sources && sources.length > 0) meta.push(`sources: ${sources.length}`);
+    if (examples && examples.length > 0) meta.push(`examples: ${examples.length}`);
+    if (thinking) meta.push('thinking: yes');
+
     // Frontmatter
     parts.push(this.buildFrontmatter({
       type: 'research',
@@ -80,17 +105,11 @@ class MarkdownRenderer extends BaseRenderer {
       model,
       profile,
       tokens,
-      saved
+      saved,
+      meta: meta.length > 0 ? meta.join(', ') : 'none'
     }));
 
-    // Thinking (if requested)
-    if (this.options.showThinking && thinking) {
-      parts.push('## Thinking Process\n');
-      parts.push(thinking);
-      parts.push('\n---\n');
-    }
-
-    // Title and content
+    // Title and content (always show)
     if (title) {
       parts.push(`## ${title}\n`);
     }
@@ -99,8 +118,15 @@ class MarkdownRenderer extends BaseRenderer {
       parts.push('');
     }
 
-    // Examples
-    if (examples && examples.length > 0) {
+    // Thinking (only if requested)
+    if (this.options.showThinking && thinking) {
+      parts.push('\n### Thinking Process\n');
+      parts.push(thinking);
+      parts.push('');
+    }
+
+    // Examples (only if requested)
+    if (this.options.showExamples && examples && examples.length > 0) {
       parts.push('\n### Examples\n');
       for (const example of examples) {
         parts.push(`**${example.description}**`);
@@ -110,8 +136,8 @@ class MarkdownRenderer extends BaseRenderer {
       }
     }
 
-    // Sources
-    if (sources && sources.length > 0) {
+    // Sources (only if requested)
+    if (this.options.showSources && sources && sources.length > 0) {
       parts.push('---\nSources:');
       for (const source of sources) {
         const num = source.number ? `[${source.number}] ` : '- ';
@@ -120,6 +146,15 @@ class MarkdownRenderer extends BaseRenderer {
           parts.push(`     ${source.url}`);
         }
       }
+    }
+
+    // Add note about hidden content
+    const hiddenParts = [];
+    if (!this.options.showThinking && thinking) hiddenParts.push('--thinking');
+    if (!this.options.showSources && sources && sources.length > 0) hiddenParts.push('--sources');
+    if (!this.options.showExamples && examples && examples.length > 0) hiddenParts.push('--examples');
+    if (hiddenParts.length > 0) {
+      parts.push(`\n*Use ${hiddenParts.join(' ')} to show additional content*`);
     }
 
     return parts.join('\n');
@@ -143,9 +178,9 @@ class MarkdownRenderer extends BaseRenderer {
       return parts.join('\n');
     }
 
-    // Table header
-    parts.push('| ID | Profile | Title | Scope | Created |');
-    parts.push('|----|---------|-------|-------|---------|');
+    // Table header with metadata columns
+    parts.push('| ID | Profile | Title | Scope | Created | Meta |');
+    parts.push('|----|---------|-------|-------|---------|------|');
 
     // Table rows
     for (const entry of entries) {
@@ -154,7 +189,17 @@ class MarkdownRenderer extends BaseRenderer {
       const entryTitle = (entry.title || entry.query || '-').slice(0, 40);
       const scope = entry.scope?.type === 'general' ? '[general]' : `[${entry.scope?.path || '-'}]`;
       const created = entry.created_at ? entry.created_at.split('T')[0] : '-';
-      parts.push(`| ${id} | ${profile} | ${entryTitle} | ${scope} | ${created} |`);
+
+      // Build metadata string
+      const metaParts = [];
+      if (entry.meta) {
+        if (entry.meta.sources > 0) metaParts.push(`${entry.meta.sources}s`);
+        if (entry.meta.examples > 0) metaParts.push(`${entry.meta.examples}e`);
+        if (entry.meta.hasThinking) metaParts.push('t');
+      }
+      const meta = metaParts.length > 0 ? metaParts.join(',') : '-';
+
+      parts.push(`| ${id} | ${profile} | ${entryTitle} | ${scope} | ${created} | ${meta} |`);
     }
 
     return parts.join('\n');
@@ -256,26 +301,27 @@ class MarkdownRenderer extends BaseRenderer {
   }
 
   /**
-   * Render curate confirmation
+   * Render save confirmation
    */
-  renderCurate() {
+  renderSave() {
     const { success, entry, category, message } = this.data;
     const parts = [];
 
     parts.push(this.buildFrontmatter({
-      type: 'curate',
+      type: 'save',
       success
     }));
 
     if (success) {
-      parts.push(`## Entry Curated\n`);
-      parts.push(`Entry **${entry?.id}** moved to category **${category?.slug}**`);
+      parts.push(`## Entry Saved to Library\n`);
+      parts.push(`- **Entry ID**: ${entry?.id}`);
+      parts.push(`- **Category**: ${category?.slug}`);
       if (entry?.title) {
-        parts.push(`\n- **Title**: ${entry.title}`);
+        parts.push(`- **Title**: ${entry.title}`);
       }
     } else {
       parts.push(`## Error\n`);
-      parts.push(message || 'Failed to curate entry');
+      parts.push(message || 'Failed to save entry');
     }
 
     return parts.join('\n');
@@ -313,42 +359,73 @@ class MarkdownRenderer extends BaseRenderer {
    * Render single entry view
    */
   renderEntry() {
-    const { entry } = this.data;
+    const { entry, showThinking, showSources, showExamples, cliCommand } = this.data;
     const parts = [];
 
-    parts.push(this.buildFrontmatter({
+    // Determine subcommand context
+    const location = entry.location === 'library' ? 'library' : 'drafts';
+    const baseCmd = `${cliCommand || 'research'} ${location} show ${entry.id.slice(0, 8)}`;
+
+    // Build frontmatter with ALL metadata
+    const frontmatter = {
       type: 'entry',
       id: entry.id,
       location: entry.location,
+      query: entry.query,
+      provider: `${entry.provider}/${entry.model}`,
       profile: entry.profile,
-      provider: entry.provider,
-      model: entry.model
-    }));
+      created: entry.created_at,
+      title: entry.title || entry.query
+    };
 
-    parts.push(`## ${entry.title || entry.query}\n`);
-    parts.push(`- **ID**: ${entry.id}`);
-    parts.push(`- **Location**: ${entry.location || 'unknown'}`);
-    parts.push(`- **Profile**: ${entry.profile}`);
-    parts.push(`- **Provider**: ${entry.provider}`);
-    parts.push(`- **Model**: ${entry.model}`);
-    parts.push(`- **Query**: ${entry.query}`);
-    parts.push(`- **Scope**: ${entry.scope?.type || 'unknown'}${entry.scope?.path ? ` (${entry.scope.path})` : ''}`);
-    parts.push(`- **Created**: ${entry.created_at}`);
-    if (entry.curated_at) parts.push(`- **Curated**: ${entry.curated_at}`);
-    if (entry.category_id) parts.push(`- **Category ID**: ${entry.category_id}`);
+    if (entry.curated_at) frontmatter.curated = entry.curated_at;
+    if (entry.category_id) frontmatter.category_id = entry.category_id;
+    if (entry.scope) frontmatter.scope = entry.scope.type;
+    if (entry.scope?.path) frontmatter.path = entry.scope.path;
 
-    if (entry.content) {
-      parts.push('\n### Content\n');
-      parts.push(entry.content);
-    }
-
-    if (entry.thinking) {
-      parts.push('\n### Thinking Process\n');
-      parts.push(entry.thinking);
-    }
-
+    // Add examples metadata
     if (entry.examples && entry.examples.length > 0) {
-      parts.push('\n### Examples\n');
+      frontmatter.examples = {
+        count: entry.examples.length,
+        show_command: `${baseCmd} --examples`
+      };
+    }
+
+    // Add sources metadata
+    if (entry.sources && entry.sources.length > 0) {
+      frontmatter.sources = {
+        count: entry.sources.length,
+        show_command: `${baseCmd} --sources`
+      };
+    }
+
+    // Add thinking metadata
+    if (entry.thinking) {
+      frontmatter.thinking = {
+        exists: true,
+        show_command: `${baseCmd} --thinking`
+      };
+    }
+
+    parts.push(this.buildFrontmatter(frontmatter));
+
+    // Show content only if NOT viewing specific sections
+    const viewingSpecificSections = showThinking || showSources || showExamples;
+    if (!viewingSpecificSections && entry.content) {
+      parts.push(entry.content);
+      parts.push('');
+    }
+
+    // Thinking section (only if requested)
+    if (showThinking && entry.thinking) {
+      parts.push('# Thinking\n');
+      parts.push(entry.thinking);
+      parts.push('');
+    }
+
+    // Examples section (only if requested)
+    if (showExamples && entry.examples && entry.examples.length > 0) {
+      parts.push('# Examples\n');
       for (const example of entry.examples) {
         parts.push(`**${example.description}**`);
         parts.push('```' + (example.language || ''));
@@ -357,8 +434,9 @@ class MarkdownRenderer extends BaseRenderer {
       }
     }
 
-    if (entry.sources && entry.sources.length > 0) {
-      parts.push('### Sources\n');
+    // Sources section (only if requested)
+    if (showSources && entry.sources && entry.sources.length > 0) {
+      parts.push('# Sources\n');
       for (const source of entry.sources) {
         const num = source.number ? `[${source.number}] ` : '- ';
         parts.push(`${num}${source.title || source.url}`);
@@ -388,6 +466,27 @@ class MarkdownRenderer extends BaseRenderer {
       parts.push(`- **ID**: ${entry?.id}`);
       if (entry?.title) parts.push(`- **Title**: ${entry.title}`);
       parts.push(`- **Location**: ${entry?.location || 'unknown'}`);
+    }
+
+    return parts.join('\n');
+  }
+
+  /**
+   * Render delete category confirmation
+   */
+  renderDeleteCategory() {
+    const { success, category } = this.data;
+    const parts = [];
+
+    parts.push(this.buildFrontmatter({
+      type: 'delete-category',
+      success
+    }));
+
+    if (success) {
+      parts.push(`## Category Deleted\n`);
+      parts.push(`- **ID**: ${category?.id}`);
+      parts.push(`- **Slug**: ${category?.slug}`);
     }
 
     return parts.join('\n');
