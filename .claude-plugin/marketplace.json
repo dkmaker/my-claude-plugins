@@ -66,6 +66,14 @@
       "description": "REST API tester MCP server - test HTTP endpoints directly from Claude Code",
       "keywords": ["mcp", "rest", "api", "http", "testing", "development"],
       "category": "productivity"
+    },
+    {
+      "name": "knowledge",
+      "source": "./knowledge",
+      "description": "Knowledge and research workflows with structured methodology and citations",
+      "version": "1.0.0",
+      "keywords": ["research", "knowledge", "citations", "investigation", "skill"],
+      "category": "knowledge"
     }
   ]
 }

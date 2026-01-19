@@ -1,0 +1,9 @@
+{
+  "name": "knowledge",
+  "description": "Knowledge and research workflows with structured methodology",
+  "version": "1.0.0",
+  "author": {
+    "name": "Christian Pedersen",
+    "email": "christian@dkmaker.xyz"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "research-cli",
+  "version": "1.0.0",
+  "description": "Profile-based research interface with multiple provider support",
+  "main": "index.js",
+  "bin": {
+    "research": "./index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node --test"
+  },
+  "keywords": ["research", "perplexity", "search", "ai"],
+  "author": "Christian Pedersen <christian@dkmaker.xyz>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
