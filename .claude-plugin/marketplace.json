@@ -66,6 +66,14 @@
       "description": "REST API tester MCP server - test HTTP endpoints directly from Claude Code",
       "keywords": ["mcp", "rest", "api", "http", "testing", "development"],
       "category": "productivity"
+    },
+    {
+      "name": "generate-image",
+      "source": "./generate-image",
+      "description": "AI image generation using various models. Generate high-quality images from text descriptions.",
+      "version": "1.0.0",
+      "keywords": ["image", "generation", "ai", "gemini", "creative", "art"],
+      "category": "creative"
     }
   ]
 }
