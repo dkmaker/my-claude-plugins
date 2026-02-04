@@ -1,7 +1,7 @@
 {
   "name": "generate-image",
   "description": "AI image generation using various models. Generate high-quality images from text descriptions.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": {
     "name": "dkmaker"
   },
