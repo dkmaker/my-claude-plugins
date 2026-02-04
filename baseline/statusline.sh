@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #============================================================================
 # ClaudeCode Status Line Script - OPTIMIZED
-# Version: 2.0.0
+# Version: 2.1.0
 # Optimized for minimal CPU/IO - runs every 300ms
 #============================================================================
 
@@ -76,22 +76,37 @@ if [[ $input =~ \"session_id\":\"([^\"]+)\" ]]; then
 
     # Cache miss - fetch git info
     if [[ -z "$git_info" ]]; then
+        git_dir="" is_worktree=""
         if [[ -d "${project_dir}/.git" ]]; then
-            # Read branch from .git/HEAD directly (no git command!)
-            if [[ -f "${project_dir}/.git/HEAD" ]]; then
-                read -r head < "${project_dir}/.git/HEAD"
+            # Regular repo - .git is a directory
+            git_dir="${project_dir}/.git"
+        elif [[ -f "${project_dir}/.git" ]]; then
+            # Worktree - .git is a file pointing to main repo
+            read -r gitdir_line < "${project_dir}/.git"
+            [[ $gitdir_line == gitdir:\ * ]] && git_dir="${gitdir_line#gitdir: }"
+            is_worktree=1
+        fi
+        if [[ -n "$git_dir" ]]; then
+            # Read branch from HEAD
+            if [[ -f "${git_dir}/HEAD" ]]; then
+                read -r head < "${git_dir}/HEAD"
                 [[ $head == ref:\ refs/heads/* ]] && branch="${head#ref: refs/heads/}"
             fi
-            # Read remote URL from config (no git command!)
-            if [[ -f "${project_dir}/.git/config" && -n "$branch" ]]; then
+            # Read remote URL - for worktrees, config is in main .git dir
+            config_file="${git_dir}/config"
+            [[ -n "$is_worktree" && ! -f "$config_file" ]] && config_file="${git_dir%/worktrees/*}/config"
+            if [[ -f "$config_file" && -n "$branch" ]]; then
                 while IFS= read -r line; do
                     [[ $line =~ url\ =\ .*github\.com[:/]([^/]+)/([^/.]+) ]] && {
                         git_info="${BASH_REMATCH[1]}/${BASH_REMATCH[2]}:${branch}"
                         break
                     }
-                done < "${project_dir}/.git/config"
+                done < "$config_file"
                 [[ -z "$git_info" && -n "$branch" ]] && git_info="$branch"
             fi
+            # Prefix with wt: if in a worktree
+            [[ -n "$is_worktree" && -n "$git_info" ]] && git_info="wt:${git_info}"
+            [[ -n "$is_worktree" && -z "$git_info" ]] && git_info="wt:"
         fi
         # Update cache
         now=${EPOCHSECONDS:-$(printf '%(%s)T' -1)}
