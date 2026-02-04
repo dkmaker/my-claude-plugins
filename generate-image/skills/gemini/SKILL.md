@@ -2,7 +2,6 @@
 name: gemini
 description: Generate images using Google Gemini API. Use when user asks to generate, create, or make images, pictures, photos, or visual content. Also for editing images, image-to-image generation, or any AI image creation requests.
 argument-hint: "[prompt description or 'interactive' for guided mode]"
-disable-model-invocation: true
 allowed-tools: Bash, Write, Read, Glob, AskUserQuestion
 ---
 
