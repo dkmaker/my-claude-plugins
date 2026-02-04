@@ -1,7 +1,7 @@
 {
   "name": "baseline",
-  "version": "2.0.0",
-  "description": "Ensures optimal Claude Code defaults and validates required tools. Sets up optimized statusline with GitHub integration and context monitoring.",
+  "version": "2.1.0",
+  "description": "Ensures optimal Claude Code defaults and validates required tools. Sets up optimized statusline with GitHub integration, worktree support, and context monitoring.",
   "author": {
     "name": "Christian Pedersen",
     "email": "christian@dkmaker.xyz"
