@@ -8,14 +8,16 @@ import argparse
 import os
 import sys
 import time
+from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 try:
     from google import genai
     from google.genai import types
     from PIL import Image
+    import yaml
 except ImportError:
     print("Error: Required packages not installed.")
     print("Please run: pip install -r requirements.txt")
@@ -53,6 +55,16 @@ class GeminiImageCLI:
             print(f"Error initializing Gemini client: {e}")
             sys.exit(1)
 
+    def _save_metadata(self, metadata: Dict[str, Any], output_path: str) -> str:
+        """Save metadata as YAML file alongside the image."""
+        output = Path(output_path)
+        metadata_path = output.parent / f"{output.stem}_metadata.yaml"
+
+        with open(metadata_path, 'w') as f:
+            yaml.dump(metadata, f, default_flow_style=False, sort_keys=False, allow_unicode=True)
+
+        return str(metadata_path)
+
     def generate_image(
         self,
         prompt: str,
@@ -61,7 +73,10 @@ class GeminiImageCLI:
         resolution: str = "2K",
         output: str = "output.png",
         use_pro: bool = True,
-        max_retries: int = 3
+        max_retries: int = 3,
+        save_metadata: bool = True,
+        user_request: Optional[str] = None,
+        composition: Optional[str] = None
     ) -> bool:
         """
         Generate or edit an image using Gemini.
@@ -74,10 +89,35 @@ class GeminiImageCLI:
             output: Output file path
             use_pro: Use Pro model (True) or standard (False)
             max_retries: Maximum number of retry attempts
+            save_metadata: Save metadata YAML file alongside image
+            user_request: Original user request/requirements
+            composition: Reasoning/composition notes explaining prompt choices
 
         Returns:
             True if successful, False otherwise
         """
+        # Initialize metadata dict to collect all generation info
+        metadata: Dict[str, Any] = {
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "user_request": user_request,
+            "composition": composition,
+            "prompt": prompt,
+            "parameters": {
+                "aspect_ratio": aspect_ratio,
+                "resolution": resolution if use_pro else "~1K (flash fixed)",
+                "model": self.MODEL_PRO if use_pro else self.MODEL_FLASH,
+                "model_name": "Gemini Pro" if use_pro else "Gemini Flash",
+                "max_retries": max_retries,
+            },
+            "input_images": images or [],
+            "output_file": output,
+        }
+
+        # Remove None values for cleaner YAML
+        if user_request is None:
+            del metadata["user_request"]
+        if composition is None:
+            del metadata["composition"]
         model = self.MODEL_PRO if use_pro else self.MODEL_FLASH
         model_name = "Gemini Pro" if use_pro else "Gemini Flash"
 
@@ -139,29 +179,59 @@ class GeminiImageCLI:
 
                 # Extract and save the generated image
                 image_saved = False
+                metadata["generation"] = {
+                    "elapsed_seconds": round(elapsed, 2),
+                    "attempts": attempt + 1,
+                }
+
                 for part in response.candidates[0].content.parts:
                     if part.text is not None:
                         print(f"\nModel description: {part.text}")
+                        metadata["model_description"] = part.text
 
                     elif part.inline_data is not None:
                         # Save the image
                         image = Image.open(BytesIO(part.inline_data.data))
+
+                        # Ensure output directory exists
+                        output_path = Path(output)
+                        output_path.parent.mkdir(parents=True, exist_ok=True)
+
                         image.save(output)
                         print(f"\n✓ Image saved to: {output}")
                         print(f"  Size: {image.size[0]}x{image.size[1]} pixels")
+
+                        metadata["output"] = {
+                            "file": output,
+                            "width": image.size[0],
+                            "height": image.size[1],
+                            "format": output_path.suffix.lstrip('.').upper(),
+                        }
                         image_saved = True
 
                 if not image_saved:
                     print("Warning: No image data found in response")
+                    metadata["error"] = "No image data in response"
+                    self._save_metadata(metadata, output)
                     return False
 
-                # Display token usage if available
+                # Collect token usage if available
                 if hasattr(response, 'usage_metadata'):
                     usage = response.usage_metadata
+                    metadata["usage"] = {
+                        "input_tokens": usage.prompt_token_count,
+                        "output_tokens": usage.candidates_token_count,
+                        "total_tokens": usage.total_token_count,
+                    }
                     print(f"\nToken usage:")
                     print(f"  Input: {usage.prompt_token_count}")
                     print(f"  Output: {usage.candidates_token_count}")
                     print(f"  Total: {usage.total_token_count}")
+
+                # Save metadata file
+                if save_metadata:
+                    metadata_path = self._save_metadata(metadata, output)
+                    print(f"✓ Metadata saved to: {metadata_path}")
 
                 return True
 
@@ -266,6 +336,24 @@ Examples:
         help="Maximum number of retry attempts (default: 3)"
     )
 
+    parser.add_argument(
+        "--no-metadata",
+        action="store_true",
+        help="Skip saving metadata YAML file"
+    )
+
+    parser.add_argument(
+        "--user-request",
+        metavar="TEXT",
+        help="Original user request/requirements (for metadata)"
+    )
+
+    parser.add_argument(
+        "--composition",
+        metavar="TEXT",
+        help="Reasoning/composition notes explaining prompt choices (for metadata)"
+    )
+
     return parser
 
 
@@ -287,7 +375,10 @@ def main():
         resolution=args.resolution,
         output=args.output,
         use_pro=not args.fast,
-        max_retries=args.retries
+        max_retries=args.retries,
+        save_metadata=not args.no_metadata,
+        user_request=args.user_request,
+        composition=args.composition
     )
 
     sys.exit(0 if success else 1)
