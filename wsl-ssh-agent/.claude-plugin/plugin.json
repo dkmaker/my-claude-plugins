@@ -1,6 +1,6 @@
 {
   "name": "wsl-ssh-agent",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Bridges Windows SSH agent to WSL for SSH/SCP/Git operations. Works with 1Password, native Windows OpenSSH agent, and other SSH agent implementations.",
   "author": {
     "name": "Christian Pedersen",

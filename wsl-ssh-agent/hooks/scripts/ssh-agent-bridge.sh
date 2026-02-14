@@ -111,8 +111,9 @@ fi
 # WSL ENVIRONMENT VALIDATION
 # ============================================================================
 
-# Check WSL interop
-if ! grep -q "^enabled" /proc/sys/fs/binfmt_misc/WSLInterop 2>/dev/null; then
+# Check WSL interop (newer kernels use WSLInterop-late)
+if ! grep -q "^enabled" /proc/sys/fs/binfmt_misc/WSLInterop 2>/dev/null \
+   && ! grep -q "^enabled" /proc/sys/fs/binfmt_misc/WSLInterop-late 2>/dev/null; then
     output_error \
         "WSL interop is disabled. Enable in /etc/wsl.conf under [interop] enabled=true, then run 'wsl --shutdown' from PowerShell." \
         "WSL SSH Agent: Interop disabled. Enable in /etc/wsl.conf"
