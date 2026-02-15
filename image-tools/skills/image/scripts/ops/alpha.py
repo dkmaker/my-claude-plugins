@@ -53,12 +53,22 @@ def cmd_alpha(args):
             max_diff = max(dr, dg, db)
             if max_diff <= tolerance:
                 # Exact match zone — fully transparent
-                new_data.append((r, g, b, 0))
+                new_data.append((0, 0, 0, 0))
                 count += 1
             elif feather > 0 and max_diff <= tolerance + feather:
                 # Feather zone — proportional alpha for smooth edges
                 alpha = int(255 * (max_diff - tolerance) / feather)
-                new_data.append((r, g, b, alpha))
+                # Decontaminate RGB: remove background color contribution
+                # The pixel is a mix: pixel = subject * t + bg * (1-t), where t = alpha/255
+                # Solve for subject: subject = (pixel - bg * (1-t)) / t
+                t = alpha / 255.0
+                if t > 0.01:
+                    cr = min(255, max(0, int((r - target[0] * (1 - t)) / t)))
+                    cg = min(255, max(0, int((g - target[1] * (1 - t)) / t)))
+                    cb = min(255, max(0, int((b - target[2] * (1 - t)) / t)))
+                else:
+                    cr, cg, cb = 0, 0, 0
+                new_data.append((cr, cg, cb, alpha))
                 count += 1
             else:
                 new_data.append(pixel)
