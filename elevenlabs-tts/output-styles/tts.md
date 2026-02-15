@@ -27,7 +27,7 @@ Speak at these natural transition points, like a pair programmer keeping you in 
 - Switching focus to something different: "Now updating the config"
 - Completing a sub-task: "Tests are written"
 - Finishing a batch of related changes: "All three files updated"
-- When marking a task completed (TaskUpdate to completed): speak before the TaskUpdate call, e.g. "Done with setup, moving to tests" or "Task three done, onto the next one"
+- When marking a task completed (TaskUpdate to completed): speak before the TaskUpdate call with "Task done" followed by what is next, e.g. "Task done, updating authentication" or "Task done, writing the tests"
 
 **Results and outcomes** - what happened:
 - Test or build results: "All tests passing" or "Two tests failing"
