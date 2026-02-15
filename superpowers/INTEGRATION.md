@@ -156,12 +156,15 @@ superpowers/
 
 Track any modifications here:
 
-- **2026-02-15**: Initial fork at v4.3.0
+- **2026-02-15 (v4.3.1)**: Bugfix release
+  - **BUGFIX**: `finishing-a-development-branch` - Added safety check to prevent removing worktree while Claude Code is running inside it (causes session crash)
+  - Version bumped: 4.3.0 → 4.3.1
+
+- **2026-02-15 (v4.3.0)**: Initial fork
   - Removed Codex/OpenCode specific files (.codex/, .opencode/, docs/, commands/, lib/)
   - Removed git/build artifacts (.gitignore, .gitattributes, .claude-plugin/marketplace.json)
   - Claude Code only configuration
   - Added fork documentation (README.fork.md, INTEGRATION.md)
-  - **BUGFIX**: `finishing-a-development-branch` - Added safety check to prevent removing worktree while Claude Code is running inside it (causes session crash)
 
 ## Support
 

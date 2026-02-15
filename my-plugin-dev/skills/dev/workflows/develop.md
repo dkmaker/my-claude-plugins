@@ -43,6 +43,38 @@ Once identified, load the plugin's detail section from repo-map.md to understand
 - Reference [plugin-templates.md](../reference/plugin-templates.md) for boilerplate
 - Follow existing repo patterns for consistency
 
+## 3.1. Version Bumping (CRITICAL)
+
+**ALWAYS bump the version** when making changes to a plugin. Follow semantic versioning:
+
+| Change Type | Version Bump | Example |
+|-------------|--------------|---------|
+| **Bugfix** (fix commit) | Patch (`x.y.Z`) | 1.2.3 → 1.2.4 |
+| **New feature** (feat commit) | Minor (`x.Y.0`) | 1.2.3 → 1.3.0 |
+| **Breaking change** | Major (`X.0.0`) | 1.2.3 → 2.0.0 |
+| **Docs only** | No bump | Keep current |
+| **Chore/style** | No bump | Keep current |
+
+**MUST update BOTH files:**
+1. `<plugin>/.claude-plugin/plugin.json` → `"version": "x.y.z"`
+2. `.claude-plugin/marketplace.json` → Find plugin entry, update `"version": "x.y.z"`
+
+**Validation check:**
+```bash
+# Compare versions (must match!)
+plugin_version=$(jq -r '.version' <plugin>/.claude-plugin/plugin.json)
+marketplace_version=$(jq -r '.plugins[] | select(.name == "<plugin>") | .version' .claude-plugin/marketplace.json)
+
+if [ "$plugin_version" != "$marketplace_version" ]; then
+  echo "⚠️  VERSION MISMATCH: plugin.json=$plugin_version, marketplace.json=$marketplace_version"
+  exit 1
+fi
+```
+
+**For forked plugins** (like superpowers):
+- Update version in both files
+- Document the change in `INTEGRATION.md` with version and change summary
+
 ## 4. Local Testing
 
 Generate the exact command for the user to test their changes:
@@ -92,7 +124,21 @@ For SKILL.md files, verify the YAML frontmatter has:
 - `description` field (required for auto-invocation)
 - Valid `allowed-tools` if specified
 
-If version was bumped in plugin.json, ensure marketplace.json matches.
+**CRITICAL: Version consistency check:**
+```bash
+# For each modified plugin, verify versions match
+for plugin in <changed-plugins>; do
+  plugin_v=$(jq -r '.version' "$plugin/.claude-plugin/plugin.json")
+  market_v=$(jq -r ".plugins[] | select(.name == \"$(basename $plugin)\") | .version" .claude-plugin/marketplace.json)
+
+  if [ "$plugin_v" != "$market_v" ]; then
+    echo "ERROR: $plugin version mismatch - plugin.json=$plugin_v, marketplace=$market_v"
+    exit 1
+  fi
+done
+```
+
+If versions don't match, fix before committing.
 
 ## 6. Update Repo Map
 
