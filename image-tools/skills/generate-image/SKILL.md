@@ -80,7 +80,7 @@ Find latest version, increment, archive previous in `archive/v{N}/`.
 
 **Gemini cannot generate transparent images.** All generated images have a solid background.
 
-When the user wants transparency, use a two-step process: generate with a **chroma key background**, then remove it with the `image:manipulate-image` skill afterwards.
+When the user wants transparency, use a two-step process: generate with a **chroma key background**, then remove it with the `image-tools:manipulate-image` skill afterwards.
 
 ### Step 1 — Choose chroma key color
 
@@ -100,9 +100,9 @@ Pick the color that is **most different from the subject's dominant colors**:
 Add to your prompt:
 `"on a solid flat [COLOR NAME] (#HEX) background. The background must be perfectly uniform solid [COLOR NAME]. No shadows, gradients, or lighting effects on the background."`
 
-### Step 3 — Remove background with image:manipulate-image
+### Step 3 — Remove background with image-tools:manipulate-image
 
-Use the `image:manipulate-image` skill. Note: Gemini won't produce exact colors. Always sample the actual corner pixel first:
+Use the `image-tools:manipulate-image` skill. Note: Gemini won't produce exact colors. Always sample the actual corner pixel first:
 
 ```bash
 # Sample actual background color

@@ -1,5 +1,5 @@
 {
-  "name": "image",
+  "name": "image-tools",
   "description": "Complete image toolkit: AI generation with Gemini and manipulation with Pillow (resize, crop, convert, alpha, transform, analyze).",
   "version": "1.0.0",
   "author": {

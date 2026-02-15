@@ -69,8 +69,8 @@
       "category": "productivity"
     },
     {
-      "name": "image",
-      "source": "./image",
+      "name": "image-tools",
+      "source": "./image-tools",
       "description": "Complete image toolkit: AI generation with Gemini and manipulation with Pillow (resize, crop, convert, alpha, transform, analyze).",
       "version": "1.0.0",
       "keywords": ["image", "generation", "ai", "gemini", "resize", "crop", "convert", "alpha", "pillow", "manipulation"],
