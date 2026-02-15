@@ -76,35 +76,31 @@ User wants iteration when they say: "another version", "adjust", "modify", "chan
 
 Find latest version, increment, archive previous in `archive/v{N}/`.
 
-## Transparent Background Workflow
+## Transparent Background Requests
 
-When the user wants an image with a transparent background (PNG with alpha), use a **chroma key** approach:
+**Gemini cannot generate transparent images.** All generated images have a solid background.
 
-1. **Generate with magenta background**: Add to your prompt:
-   `"on a solid flat magenta (#FF00FF) background. The background must be perfectly uniform solid magenta RGB(255,0,255). No shadows, gradients, or lighting effects on the background."`
+When the user wants transparency, use a two-step process: generate with a **chroma key background**, then remove it with the `image-tools:image` skill afterwards.
 
-2. **Remove background with image-tools**: After generation, use the `image-tools:image` skill.
-   **Important**: AI models don't produce exact colors — Gemini renders "magenta" as roughly (213,63,186), not (255,0,255). Always sample the actual corner pixel color first:
-   ```bash
-   # Step 1: Get the actual background color from corner pixel
-   run.sh info <image> --json  # check it's loaded correctly
+**Step 1 — Generate with magenta chroma key**: Add to your prompt:
+`"on a solid flat magenta (#FF00FF) background. The background must be perfectly uniform solid magenta RGB(255,0,255). No shadows, gradients, or lighting effects on the background."`
 
-   # Step 2: Sample corner pixel to get real bg color
-   # Use python one-liner or just use tolerance 20-30 with the approximate color
+**Step 2 — Remove background with image-tools**: Use the `image-tools:image` skill to make it transparent.
+Note: Gemini won't produce exact magenta — it renders roughly (213,63,186). Sample the actual corner pixel, then remove:
+```bash
+# Sample actual background color (will vary per image)
+# from PIL import Image; print(Image.open("image.png").getpixel((0,0)))
 
-   # Step 3: Remove background with antialiased edges
-   run.sh alpha <image> --transparent "213,63,186" --tolerance 20 --feather 40 -o <output>
+# Remove chroma key background with smooth edges
+run.sh alpha <image> --transparent "213,63,186" --tolerance 20 --feather 40 -o <output>
 
-   # Step 4: Trim empty space
-   run.sh trim <output> -o <final>
-   ```
+# Trim empty space around subject
+run.sh trim <output> -o <final>
+```
 
-**Why magenta instead of white?**
-- White backgrounds bleed into light-colored subjects (halos on arms, faces, etc.)
-- Magenta is far from most subject colors, so tolerance stays tight with fewer false matches
-- Even though the AI won't produce exact magenta, the actual color is consistent and distinct
+**Why magenta, not white?** White bleeds into light-colored subjects creating visible halos. Magenta is far from most subject colors, keeping removal clean.
 
-**When to use this**: Any time the user mentions "transparent", "no background", "PNG with alpha", "cutout", or "sticker".
+**When to use this**: User mentions "transparent", "no background", "PNG with alpha", "cutout", or "sticker". **Always tell the user** you're using a chroma key approach since the result won't be transparent until the second step.
 
 ## Reference
 
