@@ -1,7 +1,7 @@
 {
   "name": "elevenlabs-tts",
   "description": "Voice feedback while coding. Claude speaks progress updates aloud via ElevenLabs API with local Piper TTS fallback.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "author": {
     "name": "Christian Pedersen"
   },
