@@ -124,21 +124,59 @@ For SKILL.md files, verify the YAML frontmatter has:
 - `description` field (required for auto-invocation)
 - Valid `allowed-tools` if specified
 
-**CRITICAL: Version consistency check:**
-```bash
-# For each modified plugin, verify versions match
-for plugin in <changed-plugins>; do
-  plugin_v=$(jq -r '.version' "$plugin/.claude-plugin/plugin.json")
-  market_v=$(jq -r ".plugins[] | select(.name == \"$(basename $plugin)\") | .version" .claude-plugin/marketplace.json)
+**CRITICAL: Marketplace consistency check:**
 
+All three values — `name`, `source`, and `version` — MUST be consistent between
+`plugin.json`, `marketplace.json`, and the directory name.
+
+```bash
+# For each modified plugin, verify FULL consistency
+for dir in <changed-plugin-dirs>; do
+  dir_name=$(basename "$dir")
+  plugin_name=$(jq -r '.name' "$dir/.claude-plugin/plugin.json")
+  plugin_v=$(jq -r '.version' "$dir/.claude-plugin/plugin.json")
+  market_name=$(jq -r ".plugins[] | select(.source == \"./$dir_name\") | .name" .claude-plugin/marketplace.json)
+  market_source=$(jq -r ".plugins[] | select(.name == \"$plugin_name\") | .source" .claude-plugin/marketplace.json)
+  market_v=$(jq -r ".plugins[] | select(.name == \"$plugin_name\") | .version" .claude-plugin/marketplace.json)
+
+  errors=0
+
+  # 1. Name must match between plugin.json and directory
+  if [ "$plugin_name" != "$dir_name" ]; then
+    echo "ERROR: Name mismatch - directory='$dir_name', plugin.json name='$plugin_name'"
+    errors=1
+  fi
+
+  # 2. Name must match in marketplace.json
+  if [ "$plugin_name" != "$market_name" ]; then
+    echo "ERROR: Name mismatch - plugin.json='$plugin_name', marketplace.json='$market_name'"
+    errors=1
+  fi
+
+  # 3. Source path must match directory
+  if [ "$market_source" != "./$dir_name" ]; then
+    echo "ERROR: Source mismatch - marketplace.json source='$market_source', expected='./$dir_name'"
+    errors=1
+  fi
+
+  # 4. Versions must match
   if [ "$plugin_v" != "$market_v" ]; then
-    echo "ERROR: $plugin version mismatch - plugin.json=$plugin_v, marketplace=$market_v"
-    exit 1
+    echo "ERROR: Version mismatch - plugin.json=$plugin_v, marketplace.json=$market_v"
+    errors=1
+  fi
+
+  if [ $errors -eq 0 ]; then
+    echo "OK: $dir_name (v$plugin_v) - all consistent"
   fi
 done
 ```
 
-If versions don't match, fix before committing.
+**Common mistakes this catches:**
+- Renaming a directory but forgetting to update marketplace.json source path
+- Renaming a plugin but forgetting to update marketplace.json name
+- Bumping version in plugin.json but not marketplace.json (or vice versa)
+
+If any mismatch is found, fix ALL locations before committing.
 
 ## 6. Update Repo Map
 

@@ -100,10 +100,28 @@ jq '.plugins[].name' .claude-plugin/marketplace.json
 
 Add the new entry to the `plugins` array. Use the marketplace entry template from plugin-templates.md.
 
+**CRITICAL: The marketplace entry MUST be consistent with the plugin directory and plugin.json:**
+- `"name"` in marketplace.json === `"name"` in plugin.json === directory name
+- `"source"` in marketplace.json === `./<directory-name>`
+- `"version"` in marketplace.json === `"version"` in plugin.json
+
 Validate after adding:
 
 ```bash
+# JSON syntax check
 jq . .claude-plugin/marketplace.json > /dev/null && echo "Valid JSON"
+
+# Consistency check (name + source + version all match)
+dir_name="<name>"
+plugin_name=$(jq -r '.name' "$dir_name/.claude-plugin/plugin.json")
+plugin_v=$(jq -r '.version' "$dir_name/.claude-plugin/plugin.json")
+market_name=$(jq -r ".plugins[] | select(.source == \"./$dir_name\") | .name" .claude-plugin/marketplace.json)
+market_source=$(jq -r ".plugins[] | select(.name == \"$plugin_name\") | .source" .claude-plugin/marketplace.json)
+market_v=$(jq -r ".plugins[] | select(.name == \"$plugin_name\") | .version" .claude-plugin/marketplace.json)
+
+[ "$plugin_name" = "$dir_name" ] && [ "$plugin_name" = "$market_name" ] && \
+[ "$market_source" = "./$dir_name" ] && [ "$plugin_v" = "$market_v" ] && \
+echo "✅ All consistent: $dir_name v$plugin_v" || echo "❌ MISMATCH - check name/source/version across all files"
 ```
 
 ## 5. Local Test Setup
