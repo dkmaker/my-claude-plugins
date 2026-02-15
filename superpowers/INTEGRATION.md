@@ -50,6 +50,11 @@
 - `tests/` - Test suites for other platforms
 - `.git/` - Git metadata
 - `.github/` - GitHub Actions workflows
+- `.codex/` - Codex installation files
+- `.opencode/` - OpenCode installation files
+- `.gitignore` - Not needed in vendored fork
+- `.gitattributes` - Not needed in vendored fork
+- `.claude-plugin/marketplace.json` - Obsolete (plugin is in parent marketplace)
 
 ## Installation for Users
 
@@ -152,9 +157,10 @@ superpowers/
 Track any modifications here:
 
 - **2026-02-15**: Initial fork at v4.3.0
-  - Removed Codex/OpenCode specific files
+  - Removed Codex/OpenCode specific files (.codex/, .opencode/, docs/, commands/, lib/)
+  - Removed git/build artifacts (.gitignore, .gitattributes, .claude-plugin/marketplace.json)
   - Claude Code only configuration
-  - Added fork documentation
+  - Added fork documentation (README.fork.md, INTEGRATION.md)
 
 ## Support
 

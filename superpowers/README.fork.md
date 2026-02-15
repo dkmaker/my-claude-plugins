@@ -42,7 +42,8 @@ curl -s https://api.github.com/repos/obra/superpowers/releases/latest | jq -r '.
 
 Document any local modifications here:
 
-- **Removed non-Claude Code files**: Stripped out Codex/OpenCode specific components (docs/, commands/, lib/, run-hook.cmd)
+- **Removed non-Claude Code files**: Stripped out Codex/OpenCode specific components (docs/, commands/, lib/, run-hook.cmd, .codex/, .opencode/)
+- **Removed build artifacts**: .gitignore, .gitattributes, .claude-plugin/marketplace.json (obsolete in vendored fork)
 - **Claude Code only**: This fork contains only Claude Code relevant components (skills/, agents/, hooks/)
 
 ## License
