@@ -76,6 +76,36 @@ User wants iteration when they say: "another version", "adjust", "modify", "chan
 
 Find latest version, increment, archive previous in `archive/v{N}/`.
 
+## Transparent Background Workflow
+
+When the user wants an image with a transparent background (PNG with alpha), use a **chroma key** approach:
+
+1. **Generate with magenta background**: Add to your prompt:
+   `"on a solid flat magenta (#FF00FF) background. The background must be perfectly uniform solid magenta RGB(255,0,255). No shadows, gradients, or lighting effects on the background."`
+
+2. **Remove background with image-tools**: After generation, use the `image-tools:image` skill.
+   **Important**: AI models don't produce exact colors — Gemini renders "magenta" as roughly (213,63,186), not (255,0,255). Always sample the actual corner pixel color first:
+   ```bash
+   # Step 1: Get the actual background color from corner pixel
+   run.sh info <image> --json  # check it's loaded correctly
+
+   # Step 2: Sample corner pixel to get real bg color
+   # Use python one-liner or just use tolerance 20-30 with the approximate color
+
+   # Step 3: Remove background with antialiased edges
+   run.sh alpha <image> --transparent "213,63,186" --tolerance 20 --feather 40 -o <output>
+
+   # Step 4: Trim empty space
+   run.sh trim <output> -o <final>
+   ```
+
+**Why magenta instead of white?**
+- White backgrounds bleed into light-colored subjects (halos on arms, faces, etc.)
+- Magenta is far from most subject colors, so tolerance stays tight with fewer false matches
+- Even though the AI won't produce exact magenta, the actual color is consistent and distinct
+
+**When to use this**: Any time the user mentions "transparent", "no background", "PNG with alpha", "cutout", or "sticker".
+
 ## Reference
 
 For detailed setup, troubleshooting, prompt engineering, and file templates, see [SETUP.md](SETUP.md).
