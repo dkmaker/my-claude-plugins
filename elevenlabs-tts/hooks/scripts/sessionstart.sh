@@ -19,13 +19,13 @@ ln -sf "$TTS_DIR/speak.sh" "$HOME/.local/bin/speak"
 # Determine backend and status
 if [ -n "$ELEVENLABS_API_KEY" ]; then
     backend="ElevenLabs (eleven_flash_v2_5)"
-    status="Piper TTS ready with $backend backend."
+    status="📢 Voice feedback ready ($backend)"
 elif [ -f "$TTS_DIR/venv/bin/piper" ] && [ -f "$TTS_DIR/voices/en_US-amy-medium.onnx" ]; then
     backend="Piper (local)"
-    status="Piper TTS ready with $backend backend. Set ELEVENLABS_API_KEY for faster, higher quality voice."
+    status="📢 Voice feedback ready ($backend). Set ELEVENLABS_API_KEY for faster, higher quality voice."
 else
     backend="none"
-    status="Piper TTS: No backend available. Set ELEVENLABS_API_KEY or run setup-piper.sh for local fallback."
+    status="📢 Voice feedback: No backend available. Set ELEVENLABS_API_KEY or run setup-piper.sh for local fallback."
 fi
 
 # Kill stale worker so it restarts with current env
