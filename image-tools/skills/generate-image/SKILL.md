@@ -82,30 +82,55 @@ Find latest version, increment, archive previous in `archive/v{N}/`.
 
 When the user wants transparency, use a two-step process: generate with a **chroma key background**, then remove it with the `image-tools:manipulate-image` skill afterwards.
 
-### Step 1 — Choose chroma key color
+### Step 1 — Analyze subject colors BEFORE choosing chroma key
 
-Pick the color that is **most different from the subject's dominant colors**:
+**MANDATORY**: Before picking a chroma key color, list every color the subject will contain. Think through:
+- Skin/body color (e.g., grey hippo, brown dog, pink flamingo)
+- Clothing colors (shirt, pants, shoes, accessories)
+- Hair/bow/hat colors
+- Object colors (bike, tools, props)
+- Style colors (cartoon outlines are typically black)
 
-| Chroma Key | Prompt color name | Good for | Avoid when subject has |
-|------------|------------------|----------|----------------------|
-| **Magenta** `#FF00FF` | "magenta" | Most subjects, people, landscapes, animals | Pink/purple/magenta tones |
-| **Green** `#00FF00` | "bright green" or "lime green" | Pink/red/purple subjects, sunsets | Plants, nature, green clothing |
-| **Blue** `#0000FF` | "bright blue" or "pure blue" | Warm-toned subjects, fire, autumn | Sky, water, blue clothing |
-| **Yellow** `#FFFF00` | "bright yellow" | Dark subjects, night scenes, blue items | Gold, sunshine, blonde hair |
+Then pick the chroma key that has **zero overlap** with any of those colors.
 
-**Default to magenta** unless the subject clearly conflicts. When in doubt, think about what the cartoon outlines and dominant fills will be.
+### Step 2 — Pick from the chroma key palette
 
-### Step 2 — Generate with chroma key
+| Chroma Key | Exact RGB | Hex | Use when subject does NOT contain |
+|------------|-----------|-----|-----------------------------------|
+| **Green** | `RGB(0, 255, 0)` | `#00FF00` | Green, lime, emerald, forest tones |
+| **Magenta** | `RGB(255, 0, 255)` | `#FF00FF` | Pink, purple, magenta, violet, fuchsia tones |
+| **Blue** | `RGB(0, 0, 255)` | `#0000FF` | Blue, sky blue, navy, cyan, teal tones |
+| **Yellow** | `RGB(255, 255, 0)` | `#FFFF00` | Yellow, gold, blonde, sunshine, amber tones |
 
-Add to your prompt:
-`"on a solid flat [COLOR NAME] (#HEX) background. The background must be perfectly uniform solid [COLOR NAME]. No shadows, gradients, or lighting effects on the background."`
+**Selection rules:**
+1. List ALL expected subject colors first
+2. Eliminate any chroma key that overlaps with subject colors
+3. From remaining options, pick the one with maximum hue distance from the subject's dominant color
+4. **Green is the safest default** — most cartoon/illustration subjects don't contain bright lime green
+5. **Never use magenta** for subjects with pink, purple, or magenta clothing/accessories
+6. **Never use blue** for sky scenes, water, or subjects wearing blue
+7. **Never use yellow** for warm-lit scenes, blonde hair, or gold elements
+8. Document your color analysis in the `--composition` flag
 
-### Step 3 — Remove background with image-tools:manipulate-image
+### Step 3 — Generate with chroma key prompt
 
-Use the `image-tools:manipulate-image` skill. Note: Gemini won't produce exact colors. Always sample the actual corner pixel first:
+Append this **exact block** to the end of your prompt (replace `[COLOR]`, `[R,G,B]`, `[HEX]`):
+
+```
+The background must be a perfectly uniform solid [COLOR] color (RGB [R,G,B], hex [HEX]). Every pixel of the background must be exactly this color. Do not add any gradient, shading, lighting, shadow, glow, vignette, or color variation to the background. The background is a single flat solid [COLOR] (#[HEX]) fill with absolutely zero variation from edge to edge.
+```
+
+**Example for green chroma key:**
+```
+The background must be a perfectly uniform solid bright green color (RGB 0,255,0, hex #00FF00). Every pixel of the background must be exactly this color. Do not add any gradient, shading, lighting, shadow, glow, vignette, or color variation to the background. The background is a single flat solid bright green (#00FF00) fill with absolutely zero variation from edge to edge.
+```
+
+### Step 4 — Remove background with image-tools:manipulate-image
+
+Use the `image-tools:manipulate-image` skill. Gemini won't produce exact RGB values, so always sample the actual corner pixel first:
 
 ```bash
-# Sample actual background color
+# Sample actual background color from corner
 # from PIL import Image; print(Image.open("image.png").getpixel((0,0)))
 
 # Remove chroma key with HSV detection + spill suppression
