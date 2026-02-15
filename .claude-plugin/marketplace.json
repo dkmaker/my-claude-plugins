@@ -64,6 +64,7 @@
         "repo": "dkmaker/mcp-rest-api"
       },
       "description": "REST API tester MCP server - test HTTP endpoints directly from Claude Code",
+      "version": "0.4.0",
       "keywords": ["mcp", "rest", "api", "http", "testing", "development"],
       "category": "productivity"
     },
@@ -82,6 +83,14 @@
       "version": "1.0.0",
       "keywords": ["development", "plugin-dev", "toolkit", "maintenance"],
       "category": "development"
+    },
+    {
+      "name": "superpowers",
+      "source": "./superpowers",
+      "description": "Core skills library: TDD, debugging, collaboration patterns, and proven techniques (forked from obra/superpowers for local customization)",
+      "version": "4.3.0",
+      "keywords": ["skills", "tdd", "debugging", "collaboration", "best-practices", "workflows"],
+      "category": "productivity"
     }
   ]
 }
