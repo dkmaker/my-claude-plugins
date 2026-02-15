@@ -15,18 +15,22 @@ run.sh alpha <input> [options]
 | `--background R,G,B` | Background color for --remove (default: white) |
 | `--transparent R,G,B` | Make this color transparent |
 | `--tolerance N` | Color match tolerance 0-255 (default: 0 exact) |
+| `--feather N` | Feather radius for antialiased edges 0-255 (default: 0) |
 | `-o PATH` | Output path |
 
 **Examples:**
 ```bash
 run.sh alpha photo.png --add
 run.sh alpha logo.png --transparent "255,255,255" --tolerance 20
+run.sh alpha logo.png --transparent "255,255,255" --tolerance 10 --feather 30
 run.sh alpha icon.png --remove --background "0,0,0" -o icon_flat.jpg
 ```
 
 **Notes:**
 - JPEG outputs from --transparent auto-save as PNG (JPEG has no alpha).
 - Tolerance applies per-channel: each of R, G, B must be within N.
+- **Feather** creates smooth antialiased edges: pixels within `tolerance` are fully transparent, pixels between `tolerance` and `tolerance + feather` get proportional alpha (0-255). Use `--feather 20-40` for typical antialiased edges.
+- For best results with background removal: use `--tolerance 10-20 --feather 30-50`.
 
 ## composite
 

@@ -42,23 +42,30 @@ def cmd_alpha(args):
     elif args.transparent:
         target = _parse_color(args.transparent)
         tolerance = args.tolerance or 0
+        feather = args.feather or 0
         img = img.convert("RGBA")
         data = img.getdata()
         new_data = []
         count = 0
         for pixel in data:
             r, g, b = pixel[:3]
-            if (abs(r - target[0]) <= tolerance and
-                abs(g - target[1]) <= tolerance and
-                abs(b - target[2]) <= tolerance):
+            dr, dg, db = abs(r - target[0]), abs(g - target[1]), abs(b - target[2])
+            max_diff = max(dr, dg, db)
+            if max_diff <= tolerance:
+                # Exact match zone — fully transparent
                 new_data.append((r, g, b, 0))
+                count += 1
+            elif feather > 0 and max_diff <= tolerance + feather:
+                # Feather zone — proportional alpha for smooth edges
+                alpha = int(255 * (max_diff - tolerance) / feather)
+                new_data.append((r, g, b, alpha))
                 count += 1
             else:
                 new_data.append(pixel)
         img.putdata(new_data)
         out = _output_path(args.input, "transparent", args.output)
         img.save(out)
-        print(f"{args.input}: made {count} pixels transparent => {out}")
+        print(f"{args.input}: made {count} pixels transparent/semi-transparent => {out}")
 
     else:
         print("Error: specify --add, --remove, or --transparent R,G,B")
@@ -99,6 +106,7 @@ def register(subparsers):
     p.add_argument("--background", help="Background color for --remove as R,G,B (default: white)")
     p.add_argument("--transparent", help="Make color transparent as R,G,B")
     p.add_argument("--tolerance", type=int, default=0, help="Color match tolerance (0-255)")
+    p.add_argument("--feather", type=int, default=0, help="Feather radius for antialiased edges (0-255, default: 0)")
     p.set_defaults(func=cmd_alpha)
 
     p = subparsers.add_parser("composite", help="Overlay images")
