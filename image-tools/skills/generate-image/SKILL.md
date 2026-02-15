@@ -95,12 +95,12 @@ Then pick the chroma key that has **zero overlap** with any of those colors.
 
 ### Step 2 — Pick from the chroma key palette
 
-| Chroma Key | Exact RGB | Hex | Use when subject does NOT contain |
-|------------|-----------|-----|-----------------------------------|
-| **Green** | `RGB(0, 255, 0)` | `#00FF00` | Green, lime, emerald, forest tones |
-| **Magenta** | `RGB(255, 0, 255)` | `#FF00FF` | Pink, purple, magenta, violet, fuchsia tones |
-| **Blue** | `RGB(0, 0, 255)` | `#0000FF` | Blue, sky blue, navy, cyan, teal tones |
-| **Yellow** | `RGB(255, 255, 0)` | `#FFFF00` | Yellow, gold, blonde, sunshine, amber tones |
+| Chroma Key | Exact RGB | Hex | Gemini keyword | Use when subject does NOT contain |
+|------------|-----------|-----|----------------|-----------------------------------|
+| **Green** | `RGB(0, 255, 0)` | `#00FF00` | "chroma key green" | Green, lime, emerald, forest tones |
+| **Magenta** | `RGB(255, 0, 255)` | `#FF00FF` | "chroma key magenta" | Pink, purple, magenta, violet, fuchsia tones |
+| **Blue** | `RGB(0, 0, 255)` | `#0000FF` | "chroma key blue" | Blue, sky blue, navy, cyan, teal tones |
+| **Yellow** | `RGB(255, 255, 0)` | `#FFFF00` | "chroma key yellow" | Yellow, gold, blonde, sunshine, amber tones |
 
 **Selection rules:**
 1. List ALL expected subject colors first
@@ -117,12 +117,12 @@ Then pick the chroma key that has **zero overlap** with any of those colors.
 Append this **exact block** to the end of your prompt (replace `[COLOR]`, `[R,G,B]`, `[HEX]`):
 
 ```
-The background must be a perfectly uniform solid [COLOR] color (RGB [R,G,B], hex [HEX]). Every pixel of the background must be exactly this color. Do not add any gradient, shading, lighting, shadow, glow, vignette, or color variation to the background. The background is a single flat solid [COLOR] (#[HEX]) fill with absolutely zero variation from edge to edge.
+The subject is placed on a chroma key [COLOR] studio backdrop (RGB [R,G,B], hex [HEX]). Plain studio setting with soft, diffused lighting on the subject only. The background is a perfectly flat, uniform solid [COLOR] with no gradients, no shadows, no texture, no patterns, no depth of field, no bokeh. Every pixel of the background must be the same [COLOR] color (RGB [R,G,B], #[HEX]) from edge to edge with zero variation.
 ```
 
 **Example for green chroma key:**
 ```
-The background must be a perfectly uniform solid bright green color (RGB 0,255,0, hex #00FF00). Every pixel of the background must be exactly this color. Do not add any gradient, shading, lighting, shadow, glow, vignette, or color variation to the background. The background is a single flat solid bright green (#00FF00) fill with absolutely zero variation from edge to edge.
+The subject is placed on a chroma key green studio backdrop (RGB 0,255,0, hex #00FF00). Plain studio setting with soft, diffused lighting on the subject only. The background is a perfectly flat, uniform solid green with no gradients, no shadows, no texture, no patterns, no depth of field, no bokeh. Every pixel of the background must be the same green color (RGB 0,255,0, #00FF00) from edge to edge with zero variation.
 ```
 
 ### Step 4 — Remove background with image-tools:manipulate-image
