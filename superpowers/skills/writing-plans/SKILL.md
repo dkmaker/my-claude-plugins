@@ -118,7 +118,8 @@ After saving the plan, offer execution choice:
 - **REQUIRED SUB-SKILL:** New session uses superpowers:executing-plans
 
 **If Headless Runner chosen:**
+- **First:** If not already in a worktree, use superpowers:using-git-worktrees to create an isolated workspace — headless sessions run `--dangerously-skip-permissions` and should not operate on the main working tree
 - **REQUIRED SUB-SKILL:** Use superpowers:headless-runner
-- Dispatch tasks via claude-runner.js using Bash tool with run_in_background
+- Dispatch tasks via claude-runner.js using Bash tool with run_in_background, with `--cwd` pointing to the worktree
 - Check context_warning after each batch to decide resume vs new session
 - When all batches complete, use superpowers:finishing-a-development-branch

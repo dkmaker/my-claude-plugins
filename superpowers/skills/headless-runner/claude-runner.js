@@ -179,6 +179,12 @@ async function main() {
   console.log(`[${ts()}] Session starting...`);
   console.log(`           model: ${args.model} | max-turns: ${args.maxTurns} | max-budget: ${args.maxBudget || 'disabled'} | timeout: ${args.timeout || 'disabled'}`);
   if (args.resume) console.log(`           resuming: ${args.resume}`);
+  if (args.systemPrompt) {
+    console.log(`           system-prompt:`);
+    for (const line of args.systemPrompt.split('\n')) {
+      console.log(`             ${line}`);
+    }
+  }
 
   // Spawn claude -p
   const claudeArgs = buildClaudeArgs(args);
