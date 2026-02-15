@@ -173,6 +173,7 @@ async function main() {
   let stderrChunks = [];
   let killed = false;
   let incomplete = true;
+  let lastTurnUsage = null;
 
   // Print startup banner
   console.log(`[${ts()}] Session starting...`);
@@ -229,6 +230,18 @@ async function main() {
       // Extract model
       if (msg.model && !modelName) {
         modelName = msg.model;
+      }
+
+      // Track last turn's token usage for accurate context window calculation
+      // The aggregate result sums tokens across all turns, double-counting
+      // the system prompt cache. The last turn's usage reflects actual context state.
+      if (msg.usage) {
+        lastTurnUsage = {
+          input: msg.usage.input_tokens || 0,
+          output: msg.usage.output_tokens || 0,
+          cache_read: msg.usage.cache_read_input_tokens || 0,
+          cache_creation: msg.usage.cache_creation_input_tokens || 0,
+        };
       }
 
       // Process content blocks
@@ -307,14 +320,17 @@ async function main() {
     }
   }
 
-  // Context usage: all token types count toward the context window.
-  // Cache tokens (read + creation) are the system prompt/CLAUDE.md being cached —
-  // they save cost but still occupy context space.
+  // Context usage: use the LAST TURN's token counts, not the aggregate.
+  // The aggregate result sums cache tokens across all turns, double-counting
+  // the system prompt on every turn. The last turn's usage reflects the actual
+  // point-in-time context window state.
   // Reserve max_output tokens so the model has room to respond.
-  const totalTokens = tokens.input + tokens.output + tokens.cache_read + tokens.cache_creation;
+  const lastTurn = lastTurnUsage || { input: tokens.input, output: tokens.output, cache_read: tokens.cache_read, cache_creation: tokens.cache_creation };
+  const contextAtLastTurn = lastTurn.input + lastTurn.output + lastTurn.cache_read + lastTurn.cache_creation;
+  const totalTokensBilled = tokens.input + tokens.output + tokens.cache_read + tokens.cache_creation;
   const effectiveWindow = tokens.context_window - tokens.max_output;
   tokens.context_used_pct = effectiveWindow > 0
-    ? Math.round((totalTokens / effectiveWindow) * 100)
+    ? Math.round((contextAtLastTurn / effectiveWindow) * 100)
     : 0;
 
   // Git summary
@@ -366,7 +382,7 @@ async function main() {
 
   // Print summary
   console.log('');
-  console.log(`[${ts()}] Done. ${toolCalls} tool calls, ${git.commits.length} commits, ${totalTokens} tokens, $${costUsd.toFixed(2)}, ${summary.duration_seconds}s`);
+  console.log(`[${ts()}] Done. ${toolCalls} tool calls, ${git.commits.length} commits, ${totalTokensBilled} tokens billed, context ${tokens.context_used_pct}%, $${costUsd.toFixed(2)}, ${summary.duration_seconds}s`);
   if (contextWarning) {
     console.log(`[${ts()}] WARNING: Context usage at ${tokens.context_used_pct}% — consider starting a new session for next batch`);
   }
