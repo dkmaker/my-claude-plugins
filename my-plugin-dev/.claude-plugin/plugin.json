@@ -1,0 +1,10 @@
+{
+  "name": "my-plugin-dev",
+  "description": "Development toolkit for the my-claude-plugins marketplace repository",
+  "version": "1.0.0",
+  "author": {
+    "name": "Christian Pedersen",
+    "email": "christian@dkmaker.xyz"
+  },
+  "keywords": ["development", "plugin-dev", "toolkit", "maintenance"]
+}
