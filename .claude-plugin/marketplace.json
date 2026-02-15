@@ -91,6 +91,22 @@
       "version": "4.3.1",
       "keywords": ["skills", "tdd", "debugging", "collaboration", "best-practices", "workflows"],
       "category": "productivity"
+    },
+    {
+      "name": "playwright-cli-skill",
+      "source": "./playwright-cli-skill",
+      "description": "Browser automation skill using playwright-cli for web testing, form filling, screenshots, and data extraction",
+      "version": "1.0.0",
+      "keywords": ["playwright", "browser", "automation", "testing", "web", "screenshot", "skill"],
+      "category": "testing"
+    },
+    {
+      "name": "web-search-skill",
+      "source": "./web-search-skill",
+      "description": "Web search skill using Perplexity AI for search, research, reasoning, and question answering with result archiving",
+      "version": "1.0.0",
+      "keywords": ["search", "perplexity", "research", "web", "ai", "skill"],
+      "category": "productivity"
     }
   ]
 }

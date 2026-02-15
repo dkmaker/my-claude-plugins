@@ -1,0 +1,11 @@
+{
+  "name": "playwright-cli-skill",
+  "version": "1.0.0",
+  "description": "Browser automation skill using playwright-cli for web testing, form filling, screenshots, and data extraction",
+  "author": {
+    "name": "Christian Pedersen",
+    "email": "christian@dkmaker.xyz"
+  },
+  "keywords": ["playwright", "browser", "automation", "testing", "web", "screenshot", "skill"],
+  "category": "testing"
+}
