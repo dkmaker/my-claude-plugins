@@ -69,11 +69,11 @@
       "category": "productivity"
     },
     {
-      "name": "generate-image",
-      "source": "./generate-image",
-      "description": "AI image generation using various models. Generate high-quality images from text descriptions.",
+      "name": "image",
+      "source": "./image",
+      "description": "Complete image toolkit: AI generation with Gemini and manipulation with Pillow (resize, crop, convert, alpha, transform, analyze).",
       "version": "1.0.0",
-      "keywords": ["image", "generation", "ai", "gemini", "creative", "art"],
+      "keywords": ["image", "generation", "ai", "gemini", "resize", "crop", "convert", "alpha", "pillow", "manipulation"],
       "category": "creative"
     },
     {
@@ -107,14 +107,6 @@
       "version": "1.0.0",
       "keywords": ["search", "perplexity", "research", "web", "ai"],
       "category": "productivity"
-    },
-    {
-      "name": "image-tools",
-      "source": "./image-tools",
-      "description": "Swiss army knife for image manipulation: resize, crop, convert, alpha, transform, and analyze images using Pillow.",
-      "version": "1.0.0",
-      "keywords": ["image", "resize", "crop", "convert", "alpha", "pillow", "manipulation"],
-      "category": "creative"
     }
   ]
 }

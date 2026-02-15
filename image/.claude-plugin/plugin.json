@@ -1,0 +1,9 @@
+{
+  "name": "image",
+  "description": "Complete image toolkit: AI generation with Gemini and manipulation with Pillow (resize, crop, convert, alpha, transform, analyze).",
+  "version": "1.0.0",
+  "author": {
+    "name": "dkmaker"
+  },
+  "keywords": ["image", "generation", "ai", "gemini", "resize", "crop", "convert", "alpha", "pillow", "manipulation"]
+}

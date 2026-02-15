@@ -1,5 +1,5 @@
 ---
-name: gemini
+name: generate-image
 description: Generate images using Google Gemini API. Use when user asks to generate, create, or make images, pictures, photos, or visual content. Also for editing images, image-to-image generation, or any AI image creation requests.
 argument-hint: "[prompt description or 'interactive' for guided mode]"
 allowed-tools: Bash, Write, Read, Glob, AskUserQuestion
@@ -14,7 +14,7 @@ Generate high-quality AI images using Google's Gemini API.
 Run the setup check to validate environment:
 
 ```bash
-"${CLAUDE_PLUGIN_ROOT}/skills/gemini/scripts/check-setup.sh"
+"${CLAUDE_PLUGIN_ROOT}/skills/generate-image/scripts/check-setup.sh"
 ```
 
 This validates Python, venv, dependencies, API key, and shows existing images.
@@ -22,7 +22,7 @@ This validates Python, venv, dependencies, API key, and shows existing images.
 ## Generation
 
 ```bash
-SCRIPT_DIR="${CLAUDE_PLUGIN_ROOT}/skills/gemini/scripts"
+SCRIPT_DIR="${CLAUDE_PLUGIN_ROOT}/skills/generate-image/scripts"
 "$SCRIPT_DIR/generate.sh" "your detailed prompt" \
   --aspect-ratio 16:9 \
   --resolution 4K \
@@ -80,7 +80,7 @@ Find latest version, increment, archive previous in `archive/v{N}/`.
 
 **Gemini cannot generate transparent images.** All generated images have a solid background.
 
-When the user wants transparency, use a two-step process: generate with a **chroma key background**, then remove it with the `image-tools:image` skill afterwards.
+When the user wants transparency, use a two-step process: generate with a **chroma key background**, then remove it with the `image:manipulate-image` skill afterwards.
 
 ### Step 1 — Choose chroma key color
 
@@ -100,9 +100,9 @@ Pick the color that is **most different from the subject's dominant colors**:
 Add to your prompt:
 `"on a solid flat [COLOR NAME] (#HEX) background. The background must be perfectly uniform solid [COLOR NAME]. No shadows, gradients, or lighting effects on the background."`
 
-### Step 3 — Remove background with image-tools
+### Step 3 — Remove background with image:manipulate-image
 
-Use the `image-tools:image` skill. Note: Gemini won't produce exact colors. Always sample the actual corner pixel first:
+Use the `image:manipulate-image` skill. Note: Gemini won't produce exact colors. Always sample the actual corner pixel first:
 
 ```bash
 # Sample actual background color

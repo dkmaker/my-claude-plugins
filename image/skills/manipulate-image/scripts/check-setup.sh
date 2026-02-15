@@ -1,6 +1,7 @@
 #!/bin/bash
-# Setup check for image-tools plugin
+# Setup check for image manipulate skill
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$SCRIPT_DIR/../../../scripts/venv"
 ERRORS=0
 
 echo "=== Image Tools Setup Check ==="
@@ -17,14 +18,14 @@ else
     ((ERRORS++))
 fi
 
-# 2. Check/create venv
+# 2. Check/create shared venv
 echo -n "Virtual environment: "
-if [ -d "$SCRIPT_DIR/venv" ]; then
+if [ -d "$VENV_DIR" ]; then
     echo "OK exists"
 else
     echo "creating..."
-    python3 -m venv "$SCRIPT_DIR/venv"
-    if [ -d "$SCRIPT_DIR/venv" ]; then
+    python3 -m venv "$VENV_DIR"
+    if [ -d "$VENV_DIR" ]; then
         echo "  OK created"
     else
         echo "  FAILED to create venv"
@@ -34,16 +35,17 @@ fi
 
 # 3. Check/install Pillow
 echo -n "Pillow: "
-if "$SCRIPT_DIR/venv/bin/python" -c "from PIL import Image; print(Image.__version__)" 2>/dev/null; then
+if "$VENV_DIR/bin/python" -c "from PIL import Image; print(Image.__version__)" 2>/dev/null; then
     echo " OK"
 else
     echo "installing..."
-    "$SCRIPT_DIR/venv/bin/pip" install -q -r "$SCRIPT_DIR/requirements.txt" 2>/dev/null
-    if "$SCRIPT_DIR/venv/bin/python" -c "from PIL import Image" 2>/dev/null; then
+    REQUIREMENTS="$SCRIPT_DIR/../../../scripts/requirements.txt"
+    "$VENV_DIR/bin/pip" install -q -r "$REQUIREMENTS" 2>/dev/null
+    if "$VENV_DIR/bin/python" -c "from PIL import Image" 2>/dev/null; then
         echo "  OK installed"
     else
         echo "  FAILED"
-        echo "  Run: $SCRIPT_DIR/venv/bin/pip install -r $SCRIPT_DIR/requirements.txt"
+        echo "  Run: $VENV_DIR/bin/pip install -r $REQUIREMENTS"
         ((ERRORS++))
     fi
 fi

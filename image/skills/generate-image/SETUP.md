@@ -5,32 +5,23 @@ This document contains detailed setup instructions, troubleshooting, and referen
 ## Scripts Location
 
 The generation scripts are located in this skill's `scripts/` directory:
-- `${CLAUDE_PLUGIN_ROOT}/skills/gemini/scripts/check-setup.sh` - Setup validation script
-- `${CLAUDE_PLUGIN_ROOT}/skills/gemini/scripts/generate.sh` - Wrapper script
-- `${CLAUDE_PLUGIN_ROOT}/skills/gemini/scripts/image_gen.py` - Main Python CLI
-- `${CLAUDE_PLUGIN_ROOT}/skills/gemini/scripts/requirements.txt` - Dependencies
+- `${CLAUDE_PLUGIN_ROOT}/skills/generate-image/scripts/check-setup.sh` - Setup validation script
+- `${CLAUDE_PLUGIN_ROOT}/skills/generate-image/scripts/generate.sh` - Wrapper script
+- `${CLAUDE_PLUGIN_ROOT}/skills/generate-image/scripts/image_gen.py` - Main Python CLI
+
+Dependencies are managed via the shared venv:
+- `${CLAUDE_PLUGIN_ROOT}/scripts/requirements.txt` - All plugin dependencies
+- `${CLAUDE_PLUGIN_ROOT}/scripts/venv/` - Shared virtual environment
 
 ## Manual Setup
 
-### 1. Set Script Directory
+### 1. Set Up Shared Environment
 
 ```bash
-SCRIPT_DIR="${CLAUDE_PLUGIN_ROOT}/skills/gemini/scripts"
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup-venv.sh"
 ```
 
-### 2. Create Virtual Environment
-
-```bash
-python3 -m venv "$SCRIPT_DIR/venv"
-```
-
-### 3. Install Dependencies
-
-```bash
-"$SCRIPT_DIR/venv/bin/pip" install -q google-genai Pillow
-```
-
-### 4. Configure API Key
+### 2. Configure API Key
 
 Add your API key to `.claude/settings.local.json`:
 
@@ -48,7 +39,7 @@ Get your API key at: https://aistudio.google.com/apikey
 
 | Option | Values | Default | Usage |
 |--------|--------|---------|-------|
-| `--aspect-ratio` | 1:1, 3:4, 4:3, 2:3, 3:2, 16:9, 9:16, 21:9, 9:21, 32:9, 2:1 | 1:1 | Image dimensions |
+| `--aspect-ratio` | 1:1, 3:4, 4:3, 2:3, 3:2, 4:5, 5:4, 16:9, 9:16, 21:9 | 1:1 | Image dimensions |
 | `--resolution` | 1K, 2K, 4K | 2K | Output quality |
 | `--output` | filename.png | output.png | Save location |
 | `--fast` | flag | (Pro model) | Use standard model |
@@ -129,9 +120,9 @@ photorealistic" --aspect-ratio 2:3 --resolution 4K
 ## Troubleshooting
 
 ### "No module named 'google.genai'"
-Dependencies not installed. Run:
+Dependencies not installed. Run the shared setup:
 ```bash
-"$SCRIPT_DIR/venv/bin/pip" install google-genai Pillow
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/setup-venv.sh"
 ```
 
 ### "No API key found"

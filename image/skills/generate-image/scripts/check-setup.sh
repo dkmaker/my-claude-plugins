@@ -3,6 +3,7 @@
 # Validates environment, dependencies, and API key
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VENV_DIR="$SCRIPT_DIR/../../../scripts/venv"
 ERRORS=0
 WARNINGS=0
 
@@ -20,15 +21,15 @@ else
     ((ERRORS++))
 fi
 
-# 2. Check/create venv
+# 2. Check/create shared venv
 echo -n "Virtual environment: "
-if [ -d "$SCRIPT_DIR/venv" ]; then
+if [ -d "$VENV_DIR" ]; then
     echo "✓ exists"
 else
     echo "creating..."
-    python3 -m venv "$SCRIPT_DIR/venv"
-    if [ -d "$SCRIPT_DIR/venv" ]; then
-        echo "  ✓ created at $SCRIPT_DIR/venv"
+    python3 -m venv "$VENV_DIR"
+    if [ -d "$VENV_DIR" ]; then
+        echo "  ✓ created at $VENV_DIR"
     else
         echo "  ✗ failed to create"
         ((ERRORS++))
@@ -37,16 +38,17 @@ fi
 
 # 3. Check/install dependencies
 echo -n "Dependencies: "
-if "$SCRIPT_DIR/venv/bin/python" -c "from google import genai; from PIL import Image" 2>/dev/null; then
+if "$VENV_DIR/bin/python" -c "from google import genai; from PIL import Image; import yaml" 2>/dev/null; then
     echo "✓ installed"
 else
     echo "installing..."
-    "$SCRIPT_DIR/venv/bin/pip" install -q google-genai Pillow 2>/dev/null
-    if "$SCRIPT_DIR/venv/bin/python" -c "from google import genai; from PIL import Image" 2>/dev/null; then
+    REQUIREMENTS="$SCRIPT_DIR/../../../scripts/requirements.txt"
+    "$VENV_DIR/bin/pip" install -q -r "$REQUIREMENTS" 2>/dev/null
+    if "$VENV_DIR/bin/python" -c "from google import genai; from PIL import Image; import yaml" 2>/dev/null; then
         echo "  ✓ installed successfully"
     else
         echo "  ✗ failed to install"
-        echo "  Run: $SCRIPT_DIR/venv/bin/pip install google-genai Pillow"
+        echo "  Run: $VENV_DIR/bin/pip install -r $REQUIREMENTS"
         ((ERRORS++))
     fi
 fi

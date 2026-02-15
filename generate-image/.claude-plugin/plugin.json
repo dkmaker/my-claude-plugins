@@ -1,9 +1,0 @@
-{
-  "name": "generate-image",
-  "description": "AI image generation using various models. Generate high-quality images from text descriptions.",
-  "version": "1.1.0",
-  "author": {
-    "name": "dkmaker"
-  },
-  "keywords": ["image", "generation", "ai", "gemini", "creative"]
-}
