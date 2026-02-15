@@ -45,6 +45,8 @@ Document any local modifications here:
 - **Removed non-Claude Code files**: Stripped out Codex/OpenCode specific components (docs/, commands/, lib/, run-hook.cmd, .codex/, .opencode/)
 - **Removed build artifacts**: .gitignore, .gitattributes, .claude-plugin/marketplace.json (obsolete in vendored fork)
 - **Claude Code only**: This fork contains only Claude Code relevant components (skills/, agents/, hooks/)
+- **Bugfixes**:
+  - `finishing-a-development-branch`: Added safety check to prevent removing worktree while running inside it (prevents session crashes)
 
 ## License
 

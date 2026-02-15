@@ -161,6 +161,7 @@ Track any modifications here:
   - Removed git/build artifacts (.gitignore, .gitattributes, .claude-plugin/marketplace.json)
   - Claude Code only configuration
   - Added fork documentation (README.fork.md, INTEGRATION.md)
+  - **BUGFIX**: `finishing-a-development-branch` - Added safety check to prevent removing worktree while Claude Code is running inside it (causes session crash)
 
 ## Support
 

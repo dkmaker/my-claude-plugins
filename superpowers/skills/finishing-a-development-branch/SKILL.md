@@ -137,17 +137,41 @@ Then: Cleanup worktree (Step 5)
 
 **For Options 1, 2, 4:**
 
-Check if in worktree:
-```bash
-git worktree list | grep $(git branch --show-current)
-```
+**CRITICAL SAFETY CHECK - Must happen BEFORE removing worktree:**
 
-If yes:
 ```bash
+# Detect if we're currently in a worktree
+current_dir=$(pwd)
+worktree_path=$(git worktree list | grep $(git branch --show-current) | awk '{print $1}')
+
+# If we're IN the worktree we want to remove, MUST switch out first
+if [ "$current_dir" = "$worktree_path" ] || [[ "$current_dir" == "$worktree_path"/* ]]; then
+  echo "Currently in worktree - switching to main repository first"
+
+  # Get main repository path (first worktree in list)
+  main_repo=$(git worktree list | head -1 | awk '{print $1}')
+
+  # Switch to main repo
+  cd "$main_repo"
+
+  # CRITICAL: Tell user session needs to be restarted in main repo
+  echo "⚠️  IMPORTANT: You need to restart Claude Code in the main repository."
+  echo "Main repo path: $main_repo"
+  echo "After restarting, I can remove the worktree at: $worktree_path"
+  exit 0
+fi
+
+# Only reach here if we're NOT in the worktree
+# Safe to remove now
 git worktree remove <worktree-path>
 ```
 
 **For Option 3:** Keep worktree.
+
+**Why this matters:**
+- Removing a worktree while Claude Code is running inside it **crashes the session**
+- The filesystem disappears underneath the running process
+- MUST switch to main repository FIRST, then remove in a new session
 
 ## Quick Reference
 
@@ -172,6 +196,10 @@ git worktree remove <worktree-path>
 - **Problem:** Remove worktree when might need it (Option 2, 3)
 - **Fix:** Only cleanup for Options 1 and 4
 
+**Removing worktree while inside it**
+- **Problem:** Deletes filesystem under running Claude Code → session crashes
+- **Fix:** Check if in worktree, switch to main repo first, tell user to restart
+
 **No confirmation for discard**
 - **Problem:** Accidentally delete work
 - **Fix:** Require typed "discard" confirmation
@@ -183,12 +211,15 @@ git worktree remove <worktree-path>
 - Merge without verifying tests on result
 - Delete work without confirmation
 - Force-push without explicit request
+- **Remove a worktree while Claude Code is running inside it** ← CRASHES SESSION
 
 **Always:**
 - Verify tests before offering options
 - Present exactly 4 options
 - Get typed confirmation for Option 4
 - Clean up worktree for Options 1 & 4 only
+- **Check if in worktree BEFORE removing it** ← CRITICAL SAFETY
+- If in worktree: switch out first, tell user to restart Claude Code
 
 ## Integration
 
