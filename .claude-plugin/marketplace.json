@@ -93,19 +93,19 @@
       "category": "productivity"
     },
     {
-      "name": "playwright-cli-skill",
-      "source": "./playwright-cli-skill",
-      "description": "Browser automation skill using playwright-cli for web testing, form filling, screenshots, and data extraction",
+      "name": "playwright-cli",
+      "source": "./playwright-cli",
+      "description": "Browser automation using playwright-cli for web testing, form filling, screenshots, and data extraction",
       "version": "1.0.0",
-      "keywords": ["playwright", "browser", "automation", "testing", "web", "screenshot", "skill"],
+      "keywords": ["playwright", "browser", "automation", "testing", "web", "screenshot"],
       "category": "testing"
     },
     {
-      "name": "web-search-skill",
-      "source": "./web-search-skill",
-      "description": "Web search skill using Perplexity AI for search, research, reasoning, and question answering with result archiving",
+      "name": "web-search",
+      "source": "./web-search",
+      "description": "Web search using Perplexity AI for search, research, reasoning, and question answering with result archiving",
       "version": "1.0.0",
-      "keywords": ["search", "perplexity", "research", "web", "ai", "skill"],
+      "keywords": ["search", "perplexity", "research", "web", "ai"],
       "category": "productivity"
     }
   ]
