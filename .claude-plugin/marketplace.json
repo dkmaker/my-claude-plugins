@@ -96,6 +96,13 @@
       "description": "Web search using Perplexity AI for search, research, reasoning, and question answering with result archiving",
       "keywords": ["search", "perplexity", "research", "web", "ai"],
       "category": "productivity"
+    },
+    {
+      "name": "piper-tts",
+      "source": "./piper-tts",
+      "description": "Voice feedback while coding. Claude speaks progress updates aloud via ElevenLabs or local Piper TTS.",
+      "keywords": ["tts", "voice", "piper", "audio", "feedback", "accessibility"],
+      "category": "accessibility"
     }
   ]
 }

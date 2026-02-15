@@ -1,0 +1,12 @@
+{
+  "name": "piper-tts",
+  "description": "Voice feedback while coding. Claude speaks progress updates aloud via ElevenLabs or local Piper TTS.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Christian Pedersen"
+  },
+  "repository": "https://github.com/dkmaker/my-claude-plugins",
+  "license": "MIT",
+  "keywords": ["tts", "voice", "piper", "audio", "feedback", "accessibility"],
+  "outputStyles": "./output-styles/"
+}

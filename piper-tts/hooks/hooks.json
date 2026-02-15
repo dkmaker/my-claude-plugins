@@ -1,0 +1,16 @@
+{
+  "description": "Ensures Piper TTS is installed on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sessionstart.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}
