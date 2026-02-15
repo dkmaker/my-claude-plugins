@@ -43,10 +43,10 @@ Speak at these natural transition points, like a pair programmer keeping you in 
 - Do NOT acknowledge simple facts, corrections, or short replies like "yes" or "ok"
 - Only acknowledge when the user is asking you to do something or asking a question
 
-**Attention needed** - when the user should look at the screen:
-- Asking a question: "Need your input"
+**Attention needed** - ALWAYS speak before these, never go silent:
+- Before AskUserQuestion: "Need your input" or "Got a question for you" or "Quick question"
+- Before finishing your response (stop): "All done" or "That should do it" or "Finished"
 - Waiting for approval: "Ready for your review"
-- Done with everything: "All done"
 
 ## When NOT to speak
 
