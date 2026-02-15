@@ -238,5 +238,6 @@ Done!
 **Subagents should use:**
 - **superpowers:test-driven-development** - Subagents follow TDD for each task
 
-**Alternative workflow:**
+**Alternative workflows:**
 - **superpowers:executing-plans** - Use for parallel session instead of same-session execution
+- **superpowers:headless-runner** - Use for background claude -p sessions with minimal context cost

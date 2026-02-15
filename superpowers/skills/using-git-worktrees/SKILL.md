@@ -212,6 +212,7 @@ Ready to implement auth feature
 - **brainstorming** (Phase 4) - REQUIRED when design is approved and implementation follows
 - **subagent-driven-development** - REQUIRED before executing any tasks
 - **executing-plans** - REQUIRED before executing any tasks
+- **headless-runner** - REQUIRED for isolated workspace before dispatching background sessions
 - Any skill needing isolated workspace
 
 **Pairs with:**
