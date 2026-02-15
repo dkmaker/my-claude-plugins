@@ -1,0 +1,11 @@
+{
+  "name": "web-search",
+  "version": "1.0.0",
+  "description": "Web search using Perplexity AI for search, research, reasoning, and question answering with result archiving",
+  "author": {
+    "name": "Christian Pedersen",
+    "email": "christian@dkmaker.xyz"
+  },
+  "keywords": ["search", "perplexity", "research", "web", "ai"],
+  "category": "productivity"
+}

@@ -1,6 +1,6 @@
 # web-search-skill
 
-Web search skill using Perplexity AI for intelligent search, research, reasoning, and question answering.
+Web search using Perplexity AI for intelligent search, research, reasoning, and question answering.
 
 ## Features
 

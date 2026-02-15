@@ -1,6 +1,6 @@
-# playwright-cli-skill
+# playwright-cli
 
-Browser automation skill using the `playwright-cli` command-line tool.
+Browser automation using the `playwright-cli` command-line tool.
 
 ## Features
 
@@ -16,7 +16,7 @@ Browser automation skill using the `playwright-cli` command-line tool.
 ## Installation
 
 ```bash
-/plugin install playwright-cli-skill@my-claude-plugins
+/plugin install playwright-cli@my-claude-plugins
 ```
 
 ## Prerequisites
