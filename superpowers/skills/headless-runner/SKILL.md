@@ -109,32 +109,53 @@ When the background Bash task completes, read the output. The last section after
 
 **How context is measured:** The wrapper tracks per-turn token usage from the stream (not the aggregate which double-counts the system prompt across turns). It uses the **last turn's** token counts divided by the effective context window (`context_window - max_output`) to calculate the true point-in-time context usage. The `max_output` field shows how many tokens are reserved for the model's response.
 
+### Prompt Construction
+
+Detect which mode applies and construct the prompt accordingly:
+
+#### Plan-based mode (called from writing-plans workflow)
+
+If a plan file exists (e.g., `docs/plans/YYYY-MM-DD-feature.md`), point the runner at it and let `executing-plans` handle everything:
+
+```
+--prompt "Use the superpowers:executing-plans skill to implement the plan at docs/plans/2026-02-15-feature.md. Work in the current directory."
+```
+
+The `executing-plans` skill handles task ordering, batching, verification, and commits internally — do NOT inline task text or micro-manage the steps.
+
+#### Ad-hoc mode (called directly without a plan)
+
+When there is no plan file, construct a self-contained prompt:
+1. Describe the task clearly and completely (the session has no prior context)
+2. Include specific instructions: what to build, where, how to test
+3. What to report: "When done, summarize what you implemented and any issues."
+
+```
+--prompt "Create a spinning Hello World HTML page at spinning-hello.html. Dark background, colorful text, CSS animations. No external dependencies."
+```
+
 ### Batching Pattern
 
 ```
-Batch 1: --prompt "Implement Tasks 1-3 from the plan: [full task text]"
+Batch 1: --prompt "Use superpowers:executing-plans to implement docs/plans/feature.md"
   Result: context_warning: false
   → Next batch can resume
 
-Batch 2: --resume <session-id> --prompt "Continue with Tasks 4-6: [full task text]"
+Batch 2: --resume <session-id> --prompt "Continue executing the plan"
   Result: context_warning: true
   → Next batch must be a new session
 
-Batch 3: --prompt "Implement Tasks 7-9 from the plan: [full task text]"
-  (new session, fresh context)
+Batch 3: --prompt "Use superpowers:executing-plans to implement docs/plans/feature.md. Status: Tasks 1-6 complete (auth middleware, user model, login endpoint). Continue from Task 7."
+  (new session, fresh context — brief status helps avoid re-doing work)
 ```
 
-### Prompt Construction
-
-When dispatching a batch, include in the prompt:
-1. The full task descriptions from the plan (don't make it read files)
-2. Clear instructions: "Work in the current directory. Follow TDD. Commit after each task."
-3. What to report: "When done, summarize what you implemented and any issues."
+For ad-hoc mode, follow the same context_warning logic but include full task details in each new session prompt.
 
 ### Resume Prompt
 
-When resuming, include what was already completed:
-"Continue from where you left off. Tasks 1-3 are complete. Now implement Tasks 4-6: [full task text]"
+- **Plan-based (resume):** `"Continue executing the plan"` — the session already has full context
+- **Plan-based (new session after context warning):** Always instruct to use `executing-plans` with the plan path, plus a brief status of what was completed (task numbers and short descriptions) so the new session picks up where the last left off
+- **Ad-hoc:** Include what was completed and what remains, since there is no plan file to reference
 
 ## Error Handling
 
