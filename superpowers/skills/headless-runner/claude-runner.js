@@ -283,7 +283,7 @@ async function main() {
   const endSha = gitHead(args.cwd);
 
   // Token/cost data from result
-  let tokens = { input: 0, output: 0, cache_read: 0, cache_creation: 0, context_window: 200000, context_used_pct: 0 };
+  let tokens = { input: 0, output: 0, cache_read: 0, cache_creation: 0, context_window: 200000, max_output: 32000, context_used_pct: 0 };
   let costUsd = 0;
 
   if (resultData) {
@@ -296,19 +296,25 @@ async function main() {
     costUsd = resultData.total_cost_usd || 0;
     sessionId = sessionId || resultData.session_id;
 
-    // Extract context window from modelUsage
+    // Extract context window and max output from modelUsage
     if (resultData.modelUsage) {
       const models = Object.values(resultData.modelUsage);
       if (models.length > 0) {
         tokens.context_window = models[0].contextWindow || 200000;
+        tokens.max_output = models[0].maxOutputTokens || 32000;
         modelName = modelName || Object.keys(resultData.modelUsage)[0];
       }
     }
   }
 
+  // Context usage: all token types count toward the context window.
+  // Cache tokens (read + creation) are the system prompt/CLAUDE.md being cached —
+  // they save cost but still occupy context space.
+  // Reserve max_output tokens so the model has room to respond.
   const totalTokens = tokens.input + tokens.output + tokens.cache_read + tokens.cache_creation;
-  tokens.context_used_pct = tokens.context_window > 0
-    ? Math.round((totalTokens / tokens.context_window) * 100)
+  const effectiveWindow = tokens.context_window - tokens.max_output;
+  tokens.context_used_pct = effectiveWindow > 0
+    ? Math.round((totalTokens / effectiveWindow) * 100)
     : 0;
 
   // Git summary
