@@ -4,6 +4,35 @@
 > Each template is derived from existing plugins in the repo.
 > Before using these templates, verify current conventions via `claude-docs`.
 
+## plugin.json — Valid Fields Reference
+
+**CRITICAL**: `plugin.json` has a strict schema. Unrecognized keys cause installation failure.
+
+**Valid fields ONLY:**
+
+| Field | Type | Required | Notes |
+|-------|------|----------|-------|
+| `name` | string | Yes | kebab-case, must match directory name |
+| `version` | string | No | Semver (e.g., "1.0.0") |
+| `description` | string | No | Brief purpose |
+| `author` | object | No | `{name, email}` |
+| `homepage` | string | No | URL |
+| `repository` | string | No | URL |
+| `license` | string | No | SPDX identifier |
+| `keywords` | array | No | Discovery tags |
+| `commands` | string/array | No | Custom command paths |
+| `agents` | string/array | No | Custom agent paths |
+| `skills` | string/array | No | Custom skill paths |
+| `hooks` | string/array/object | No | Hook config or paths |
+| `mcpServers` | string/array/object | No | MCP server config |
+| `outputStyles` | string/array | No | Output style paths |
+| `lspServers` | string/array/object | No | LSP server config |
+
+**NEVER add custom fields** like `category`, `upstream`, `tags`, etc. to plugin.json.
+These fields belong ONLY in `marketplace.json` entries.
+
+**Note**: `category` and `tags` are marketplace-only fields (valid in marketplace.json but NOT in plugin.json).
+
 ## Feature Plugin — plugin.json
 
 Based on: `baseline/.claude-plugin/plugin.json`

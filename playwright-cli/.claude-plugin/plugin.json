@@ -6,6 +6,5 @@
     "name": "Christian Pedersen",
     "email": "christian@dkmaker.xyz"
   },
-  "keywords": ["playwright", "browser", "automation", "testing", "web", "screenshot"],
-  "category": "testing"
+  "keywords": ["playwright", "browser", "automation", "testing", "web", "screenshot"]
 }

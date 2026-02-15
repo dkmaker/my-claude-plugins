@@ -3,6 +3,12 @@
 This is a vendored fork of [obra/superpowers](https://github.com/obra/superpowers) v4.3.0
 maintained in the my-claude-plugins marketplace for local customization and control.
 
+## Upstream Tracking
+
+- **Original Repository**: https://github.com/obra/superpowers
+- **Forked From Version**: 4.3.0
+- **Forked At**: 2026-02-15
+
 ## Original Author
 
 **Jesse Vincent** (@obra)
