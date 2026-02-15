@@ -98,11 +98,13 @@ git commit -m "feat: add specific feature"
 
 After saving the plan, offer execution choice:
 
-**"Plan complete and saved to `docs/plans/<filename>.md`. Two execution options:**
+**"Plan complete and saved to `docs/plans/<filename>.md`. Three execution options:**
 
 **1. Subagent-Driven (this session)** - I dispatch fresh subagent per task, review between tasks, fast iteration
 
 **2. Parallel Session (separate)** - Open new session with executing-plans, batch execution with checkpoints
+
+**3. Headless Runner (background)** - I launch claude -p in background, minimal context cost, auto context awareness, structured results back
 
 **Which approach?"**
 
@@ -114,3 +116,9 @@ After saving the plan, offer execution choice:
 **If Parallel Session chosen:**
 - Guide them to open new session in worktree
 - **REQUIRED SUB-SKILL:** New session uses superpowers:executing-plans
+
+**If Headless Runner chosen:**
+- **REQUIRED SUB-SKILL:** Use superpowers:headless-runner
+- Dispatch tasks via claude-runner.js using Bash tool with run_in_background
+- Check context_warning after each batch to decide resume vs new session
+- When all batches complete, use superpowers:finishing-a-development-branch
