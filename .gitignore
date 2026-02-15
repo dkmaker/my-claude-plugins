@@ -13,6 +13,9 @@ settings.local.json
 # Test/development directories
 test-plugin/
 
+# Git worktrees
+.worktrees/
+
 # Node modules (if any JavaScript projects are added)
 node_modules/
 
