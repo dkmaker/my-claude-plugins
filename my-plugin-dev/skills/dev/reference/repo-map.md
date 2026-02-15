@@ -1,6 +1,7 @@
 # my-claude-plugins Repository Map
 
 > This file is auto-regenerated. Do not edit manually — it gets rebuilt when structural changes are made via the dev skill.
+> **Versions are NOT tracked here.** Check `plugin.json` for local plugins or `marketplace.json` for external plugins.
 
 ## Repository
 
@@ -11,25 +12,25 @@
 
 ## Plugins Overview
 
-| Plugin | Version | Type | Category | Components |
-|--------|---------|------|----------|------------|
-| baseline | 1.0.0 | Feature | productivity | hooks, statusline |
-| claude-expert | 2.0.0 | Feature | knowledge | hooks, skills |
-| generate-image | 1.0.0 | Feature | creative | skills |
-| image-tools | 1.0.0 | Feature | creative | skills |
-| mcp-rest-api | 0.4.0 | External (GitHub) | productivity | mcpServers |
-| my-plugin-dev | 1.0.0 | Feature | development | skills |
-| perplexity | 0.5.0 | MCP wrapper | productivity | mcpServers |
-| playwright | 1.0.0 | MCP wrapper | testing | mcpServers |
-| playwright-cli | 1.0.0 | Feature | testing | skills |
-| superpowers | 4.3.1 | Feature | productivity | hooks, skills, agents |
-| transcript | 1.0.0 | Feature | productivity | hooks, commands, scripts |
-| web-search | 1.0.0 | Feature | productivity | skills |
-| wsl-ssh-agent | 1.0.0 | Feature | productivity | hooks, scripts |
+| Plugin | Type | Category | Components |
+|--------|------|----------|------------|
+| baseline | Feature | productivity | hooks, statusline |
+| claude-expert | Feature | knowledge | hooks, skills |
+| generate-image | Feature | creative | skills |
+| image-tools | Feature | creative | skills |
+| mcp-rest-api | External (GitHub) | productivity | mcpServers |
+| my-plugin-dev | Feature | development | skills |
+| perplexity | MCP wrapper | productivity | mcpServers |
+| playwright | MCP wrapper | testing | mcpServers |
+| playwright-cli | Feature | testing | skills |
+| superpowers | Feature | productivity | hooks, skills, agents |
+| transcript | Feature | productivity | hooks, commands, scripts |
+| web-search | Feature | productivity | skills |
+| wsl-ssh-agent | Feature | productivity | hooks, scripts |
 
 ## Per-Plugin Detail
 
-### baseline (v1.0.0) — Feature plugin
+### baseline — Feature plugin
 - **Manifest**: `baseline/.claude-plugin/plugin.json`
 - **Hooks**: `baseline/hooks/hooks.json`
   - SessionStart → `baseline/hooks/scripts/baseline-check.sh` (10s timeout)
@@ -37,7 +38,7 @@
 - **Dependencies**: jq (critical), git (critical), ripgrep (optional)
 - **Behavior**: Validates tools, applies recommended settings with 2-hour throttling, creates settings backups
 
-### claude-expert (v2.0.0) — Feature plugin
+### claude-expert — Feature plugin
 - **Manifest**: `claude-expert/.claude-plugin/plugin.json`
 - **Hooks**: `claude-expert/hooks/hooks.json`
   - SessionStart → `claude-expert/hooks/scripts/sessionstart.sh` (5s timeout)
@@ -47,7 +48,7 @@
 - **External CLI**: `claude-docs` (installed globally by the SessionStart hook from GitHub releases)
 - **Behavior**: Installs/updates claude-docs CLI, injects system prompt to use docs skill
 
-### generate-image (v1.0.0) — Feature plugin
+### generate-image — Feature plugin
 - **Manifest**: `generate-image/.claude-plugin/plugin.json`
 - **Skills**: `generate-image/skills/gemini/SKILL.md`
   - `/my-claude-plugins:generate-image:gemini` — AI image generation via Google Gemini
@@ -56,7 +57,7 @@
 - **Scripts**: `generate-image/skills/gemini/scripts/` (check-setup.sh, generate.sh, image_gen.py)
 - **Dependencies**: Python 3.x, venv, GEMINI_API_KEY
 
-### image-tools (v1.0.0) — Feature plugin
+### image-tools — Feature plugin
 - **Manifest**: `image-tools/.claude-plugin/plugin.json`
 - **Skills**: `image-tools/skills/image/SKILL.md`
   - `/my-claude-plugins:image-tools:image` — Swiss army knife for image manipulation
@@ -69,11 +70,12 @@
 - **Subcommands** (13): resize, thumbnail, crop, trim, pad, convert, compress, alpha, composite, rotate, flip, info, metadata
 - **Dependencies**: Python 3.8+, Pillow (venv)
 
-### mcp-rest-api (v0.4.0) — External plugin (GitHub)
+### mcp-rest-api — External plugin (GitHub)
 - **Source**: `dkmaker/mcp-rest-api` (GitHub repo, not local)
 - **Type**: MCP server for REST API testing
+- **Note**: Version tracked in marketplace.json (no local plugin.json)
 
-### my-plugin-dev (v1.0.0) — Feature plugin
+### my-plugin-dev — Feature plugin
 - **Manifest**: `my-plugin-dev/.claude-plugin/plugin.json`
 - **Skills**: `my-plugin-dev/skills/dev/SKILL.md`
   - `/my-claude-plugins:my-plugin-dev:dev` — development toolkit
@@ -82,18 +84,18 @@
   - Workflows: develop, troubleshoot, scaffold
   - Supporting files in `workflows/` and `reference/`
 
-### perplexity (v0.5.0) — MCP wrapper
+### perplexity — MCP wrapper
 - **Manifest**: `perplexity/.claude-plugin/plugin.json`
 - **MCP Server**: `npx -y @perplexity-ai/mcp-server`
   - Env: `PERPLEXITY_API_KEY` (required), `PERPLEXITY_TIMEOUT_MS` (optional)
 - **Tools provided**: perplexity_ask, perplexity_search, perplexity_reason, perplexity_research
 
-### playwright (v1.0.0) — MCP wrapper
+### playwright — MCP wrapper
 - **Manifest**: `playwright/.claude-plugin/plugin.json`
 - **MCP Server**: `npx -y @playwright/mcp@latest`
 - **Tools provided**: Browser automation (navigate, click, screenshot, etc.)
 
-### playwright-cli (v1.0.0) — Feature plugin
+### playwright-cli — Feature plugin
 - **Manifest**: `playwright-cli/.claude-plugin/plugin.json`
 - **Skills**: `playwright-cli/skills/playwright-cli/SKILL.md`
   - `/my-claude-plugins:playwright-cli:playwright-cli` — browser automation via playwright-cli
@@ -102,15 +104,16 @@
   - request-mocking.md, running-code.md, session-management.md, storage-state.md, test-generation.md, tracing.md, video-recording.md
 - **Dependencies**: playwright-cli (npm global)
 
-### superpowers (v4.3.1) — Feature plugin
+### superpowers — Feature plugin
 - **Manifest**: `superpowers/.claude-plugin/plugin.json`
 - **Hooks**: `superpowers/hooks/hooks.json`
   - SessionStart → `superpowers/hooks/session-start.sh` (matcher: startup|resume|clear|compact)
-- **Skills** (14):
+- **Skills** (15):
   - `brainstorming/SKILL.md`
   - `dispatching-parallel-agents/SKILL.md`
   - `executing-plans/SKILL.md`
   - `finishing-a-development-branch/SKILL.md`
+  - `headless-runner/SKILL.md` + `headless-runner/claude-runner.js`
   - `receiving-code-review/SKILL.md`
   - `requesting-code-review/SKILL.md`
   - `subagent-driven-development/SKILL.md`
@@ -124,7 +127,7 @@
 - **Agents**: `superpowers/agents/code-reviewer.md`
 - **Origin**: Forked from obra/superpowers for local customization
 
-### transcript (v1.0.0) — Feature plugin
+### transcript — Feature plugin
 - **Manifest**: `transcript/.claude-plugin/plugin.json`
 - **Hooks**: `transcript/hooks/hooks.json`
   - SessionStart → `transcript/hooks/scripts/sessionstart.sh`
@@ -134,7 +137,7 @@
 - **Scripts**: `transcript/scripts/` (create-transcript.sh, normalize-transcript.sh, render-html-js.sh)
 - **Behavior**: Sets CLAUDE_ACTIVE_TRANSCRIPT, CLAUDE_SESSION_ID env vars
 
-### web-search (v1.0.0) — Feature plugin
+### web-search — Feature plugin
 - **Manifest**: `web-search/.claude-plugin/plugin.json`
 - **Skills**: `web-search/skills/search/SKILL.md`
   - `/my-claude-plugins:web-search:search` — web search via Perplexity AI subagent
@@ -143,7 +146,7 @@
 - **Scripts**: `web-search/skills/search/scripts/` (update-index.sh, list.sh, slug.sh)
 - **Dependencies**: PERPLEXITY_API_KEY, web-search custom agent
 
-### wsl-ssh-agent (v1.0.0) — Feature plugin
+### wsl-ssh-agent — Feature plugin
 - **Manifest**: `wsl-ssh-agent/.claude-plugin/plugin.json`
 - **Hooks**: `wsl-ssh-agent/hooks/hooks.json`
   - SessionStart → `wsl-ssh-agent/hooks/scripts/ssh-agent-bridge.sh` (15s timeout)
@@ -159,3 +162,4 @@
 - **Scripts**: Must be executable (`chmod +x`)
 - **Plugin cache**: `~/.claude/plugins/cache/my-claude-plugins/<plugin-name>/`
 - **Local dev**: Use `claude --plugin-dir /home/cp/code/dkmaker/my-claude-plugins/<plugin-name>`
+- **Versions**: Check `<plugin>/.claude-plugin/plugin.json` — never duplicated in this file or marketplace.json

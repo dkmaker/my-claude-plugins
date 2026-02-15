@@ -178,11 +178,12 @@ Based on: `.claude-plugin/marketplace.json` entries
   "name": "PLUGIN_NAME",
   "source": "./PLUGIN_NAME",
   "description": "BRIEF_DESCRIPTION",
-  "version": "1.0.0",
   "keywords": ["KEYWORD1", "KEYWORD2"],
   "category": "CATEGORY"
 }
 ```
+
+**DO NOT include `version` here.** Version belongs only in `plugin.json`. Per official docs, `plugin.json` takes priority and you only need it in one place. The only exception is external plugins (e.g., GitHub sources) that have no local `plugin.json`.
 
 Valid categories in this repo: `knowledge`, `productivity`, `testing`, `creative`, `development`
 

@@ -55,24 +55,16 @@ Once identified, load the plugin's detail section from repo-map.md to understand
 | **Docs only** | No bump | Keep current |
 | **Chore/style** | No bump | Keep current |
 
-**MUST update BOTH files:**
-1. `<plugin>/.claude-plugin/plugin.json` → `"version": "x.y.z"`
-2. `.claude-plugin/marketplace.json` → Find plugin entry, update `"version": "x.y.z"`
+**Version lives in ONE place only: `plugin.json`**
 
-**Validation check:**
-```bash
-# Compare versions (must match!)
-plugin_version=$(jq -r '.version' <plugin>/.claude-plugin/plugin.json)
-marketplace_version=$(jq -r '.plugins[] | select(.name == "<plugin>") | .version' .claude-plugin/marketplace.json)
+Update `<plugin>/.claude-plugin/plugin.json` → `"version": "x.y.z"`
 
-if [ "$plugin_version" != "$marketplace_version" ]; then
-  echo "⚠️  VERSION MISMATCH: plugin.json=$plugin_version, marketplace.json=$marketplace_version"
-  exit 1
-fi
-```
+**DO NOT add version to marketplace.json plugin entries.** Per official Claude Code docs, `plugin.json` takes priority and you only need to set it in one place. Duplicating it in marketplace.json causes version drift.
+
+**Exception:** Plugins with no local `plugin.json` (e.g., external GitHub sources like `mcp-rest-api`) must have their version in marketplace.json since that's the only place to declare it.
 
 **For forked plugins** (like superpowers):
-- Update version in both files
+- Update version in `plugin.json` only
 - Document the change in `INTEGRATION.md` with version and change summary
 
 ## 4. Local Testing
@@ -126,15 +118,13 @@ For SKILL.md files, verify the YAML frontmatter has:
 
 **CRITICAL: Marketplace consistency check:**
 
-All three values — `name`, `source`, and `version` — MUST be consistent between
-`plugin.json`, `marketplace.json`, and the directory name.
+`name` and `source` MUST be consistent between `plugin.json`, `marketplace.json`, and the directory name. Version must NOT be duplicated in marketplace.json (except for external plugins).
 
 ```bash
-# For each modified plugin, verify FULL consistency
+# For each modified plugin, verify consistency
 for dir in <changed-plugin-dirs>; do
   dir_name=$(basename "$dir")
   plugin_name=$(jq -r '.name' "$dir/.claude-plugin/plugin.json")
-  plugin_v=$(jq -r '.version' "$dir/.claude-plugin/plugin.json")
   market_name=$(jq -r ".plugins[] | select(.source == \"./$dir_name\") | .name" .claude-plugin/marketplace.json)
   market_source=$(jq -r ".plugins[] | select(.name == \"$plugin_name\") | .source" .claude-plugin/marketplace.json)
   market_v=$(jq -r ".plugins[] | select(.name == \"$plugin_name\") | .version" .claude-plugin/marketplace.json)
@@ -159,14 +149,14 @@ for dir in <changed-plugin-dirs>; do
     errors=1
   fi
 
-  # 4. Versions must match
-  if [ "$plugin_v" != "$market_v" ]; then
-    echo "ERROR: Version mismatch - plugin.json=$plugin_v, marketplace.json=$market_v"
+  # 4. Version must NOT be in marketplace.json for local plugins
+  if [ "$market_v" != "null" ]; then
+    echo "ERROR: Remove version from marketplace.json for '$plugin_name' — version belongs only in plugin.json"
     errors=1
   fi
 
   if [ $errors -eq 0 ]; then
-    echo "OK: $dir_name (v$plugin_v) - all consistent"
+    echo "OK: $dir_name (v$(jq -r '.version' "$dir/.claude-plugin/plugin.json")) - all consistent"
   fi
 done
 ```
@@ -174,7 +164,7 @@ done
 **Common mistakes this catches:**
 - Renaming a directory but forgetting to update marketplace.json source path
 - Renaming a plugin but forgetting to update marketplace.json name
-- Bumping version in plugin.json but not marketplace.json (or vice versa)
+- Adding version to marketplace.json for a local plugin (causes drift)
 
 If any mismatch is found, fix ALL locations before committing.
 
