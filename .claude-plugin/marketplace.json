@@ -13,7 +13,6 @@
       "name": "claude-expert",
       "source": "./claude-expert",
       "description": "Expert knowledge system for Claude Code with complete documentation database, intelligent search, and automatic CLI management. Provides authoritative answers to all Claude Code questions using official documentation.",
-      "version": "2.0.0",
       "keywords": ["documentation", "expert", "knowledge", "claude-code", "help", "search", "nodejs"],
       "category": "knowledge"
     },
@@ -21,7 +20,6 @@
       "name": "perplexity",
       "source": "./perplexity",
       "description": "Real-time web search, reasoning, and research through Perplexity's API via MCP server",
-      "version": "0.5.0",
       "keywords": ["mcp", "search", "web-search", "perplexity", "research", "reasoning", "ai"],
       "category": "productivity"
     },
@@ -29,7 +27,6 @@
       "name": "playwright",
       "source": "./playwright",
       "description": "Browser automation and testing with Playwright via MCP server",
-      "version": "1.0.0",
       "keywords": ["mcp", "playwright", "browser", "automation", "testing", "e2e", "web"],
       "category": "testing"
     },
@@ -37,7 +34,6 @@
       "name": "baseline",
       "source": "./baseline",
       "description": "Ensures optimal Claude Code defaults and validates required tools. Includes custom statusline and recommended settings.",
-      "version": "1.0.0",
       "keywords": ["configuration", "defaults", "tools", "validation", "statusline", "settings"],
       "category": "productivity"
     },
@@ -45,7 +41,6 @@
       "name": "transcript",
       "source": "./transcript",
       "description": "Parse and analyze Claude Code session transcripts with beautiful HTML output. List transcripts, generate reports, and explore conversation history.",
-      "version": "1.0.0",
       "keywords": ["transcript", "session", "debug", "history", "analysis", "html", "report"],
       "category": "productivity"
     },
@@ -53,7 +48,6 @@
       "name": "wsl-ssh-agent",
       "source": "./wsl-ssh-agent",
       "description": "Bridges Windows SSH agent to WSL for SSH/SCP/Git operations. Works with 1Password, native Windows OpenSSH, and other SSH agent implementations.",
-      "version": "1.0.0",
       "keywords": ["wsl", "ssh", "ssh-agent", "1password", "git", "windows"],
       "category": "productivity"
     },
@@ -72,7 +66,6 @@
       "name": "image-tools",
       "source": "./image-tools",
       "description": "Complete image toolkit: AI generation with Gemini and manipulation with Pillow (resize, crop, convert, alpha, transform, analyze).",
-      "version": "1.0.0",
       "keywords": ["image", "generation", "ai", "gemini", "resize", "crop", "convert", "alpha", "pillow", "manipulation"],
       "category": "creative"
     },
@@ -80,7 +73,6 @@
       "name": "my-plugin-dev",
       "source": "./my-plugin-dev",
       "description": "Development toolkit for maintaining and developing the my-claude-plugins marketplace",
-      "version": "1.0.0",
       "keywords": ["development", "plugin-dev", "toolkit", "maintenance"],
       "category": "development"
     },
@@ -88,7 +80,6 @@
       "name": "superpowers",
       "source": "./superpowers",
       "description": "Core skills library: TDD, debugging, collaboration patterns, and proven techniques (forked from obra/superpowers for local customization)",
-      "version": "4.4.2",
       "keywords": ["skills", "tdd", "debugging", "collaboration", "best-practices", "workflows"],
       "category": "productivity"
     },
@@ -96,7 +87,6 @@
       "name": "playwright-cli",
       "source": "./playwright-cli",
       "description": "Browser automation using playwright-cli for web testing, form filling, screenshots, and data extraction",
-      "version": "1.0.0",
       "keywords": ["playwright", "browser", "automation", "testing", "web", "screenshot"],
       "category": "testing"
     },
@@ -104,7 +94,6 @@
       "name": "web-search",
       "source": "./web-search",
       "description": "Web search using Perplexity AI for search, research, reasoning, and question answering with result archiving",
-      "version": "1.0.0",
       "keywords": ["search", "perplexity", "research", "web", "ai"],
       "category": "productivity"
     }
