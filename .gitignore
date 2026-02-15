@@ -39,3 +39,7 @@ temp/
 
 # Python venv
 /**/venv/
+
+# Python bytecode
+__pycache__/
+*.pyc
