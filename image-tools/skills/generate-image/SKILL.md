@@ -125,19 +125,22 @@ The subject is placed on a chroma key [COLOR] studio backdrop (RGB [R,G,B], hex 
 The subject is placed on a chroma key green studio backdrop (RGB 0,255,0, hex #00FF00). Plain studio setting with soft, diffused lighting on the subject only. The background is a perfectly flat, uniform solid green with no gradients, no shadows, no texture, no patterns, no depth of field, no bokeh. Every pixel of the background must be the same green color (RGB 0,255,0, #00FF00) from edge to edge with zero variation.
 ```
 
-### Step 4 — Remove background with image-tools:manipulate-image
+### Step 4 — Remove background (post-processing)
 
-Use the `image-tools:manipulate-image` skill. Gemini won't produce exact RGB values, so always sample the actual corner pixel first:
+Gemini won't produce exact RGB values, so always sample the actual corner pixel, then use the manipulate-image scripts directly to remove the background and trim.
 
 ```bash
-# Sample actual background color from corner
-# from PIL import Image; print(Image.open("image.png").getpixel((0,0)))
+VENV="${CLAUDE_PLUGIN_ROOT}/scripts/venv"
+MANIPULATE="${CLAUDE_PLUGIN_ROOT}/skills/manipulate-image/scripts"
 
-# Remove chroma key with HSV detection + spill suppression
-run.sh alpha <image> --transparent "<actual R,G,B>" --tolerance 15 --feather 40 -o <output>
+# 1. Sample actual background color from corner
+"$VENV/bin/python" -c "from PIL import Image; print(Image.open('<image>').getpixel((0,0)))"
 
-# Trim empty space
-run.sh trim <output> -o <final>
+# 2. Remove chroma key with HSV detection + spill suppression
+"$MANIPULATE/run.sh" alpha <image> --transparent "<actual R,G,B>" --tolerance 15 --feather 40 -o <output>
+
+# 3. Trim empty space
+"$MANIPULATE/run.sh" trim <output> -o <final>
 ```
 
 ### When to use this
