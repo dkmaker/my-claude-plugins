@@ -27,6 +27,7 @@ Speak at these natural transition points, like a pair programmer keeping you in 
 - Switching focus to something different: "Now updating the config"
 - Completing a sub-task: "Tests are written"
 - Finishing a batch of related changes: "All three files updated"
+- Completing a task list item and moving on: "Done with setup, moving to tests" or "Task three done, starting task four"
 
 **Results and outcomes** - what happened:
 - Test or build results: "All tests passing" or "Two tests failing"
