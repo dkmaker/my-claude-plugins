@@ -48,6 +48,22 @@ Replace `SKILL_DIR` with the base directory path shown at the top when this skil
 
 *One of `--prompt` or `--resume` is required. Both can be used together (resume + new prompt).
 
+### Model Selection
+
+Choose the model based on task complexity:
+
+| Model | Use when | Examples |
+|---|---|---|
+| **haiku** | Simple, mechanical tasks with clear instructions | Rename variables, add boilerplate, run formatters, simple tests, file moves |
+| **sonnet** | Standard implementation work (default) | Implement features from a clear plan, write tests, fix known bugs, refactoring |
+| **opus** | Complex tasks requiring deep reasoning | Architectural changes, cross-cutting refactors, debugging subtle issues, tasks with ambiguous requirements |
+
+**Rules of thumb:**
+- If the plan has exact code to copy — **haiku** (cheapest, fastest)
+- If the plan describes what to build but the engineer decides how — **sonnet** (best balance)
+- If the task needs judgment calls, design decisions, or debugging — **opus** (most capable)
+- When in doubt, use **sonnet** — it handles most implementation tasks well
+
 ## Reading Results
 
 When the background Bash task completes, read the output. The last section after `---CLAUDE-RUNNER-RESULT---` is a JSON summary:
