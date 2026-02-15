@@ -30,6 +30,8 @@ node SKILL_DIR/claude-runner.js \
 
 Replace `SKILL_DIR` with the base directory path shown at the top when this skill loads.
 
+**No `CLAUDECODE=` prefix needed.** The script automatically unsets the `CLAUDECODE` environment variable before spawning `claude -p`, so it works correctly when called from within a Claude Code session via the Bash tool.
+
 ### CLI Options
 
 | Flag | Default | Description |
@@ -63,7 +65,8 @@ When the background Bash task completes, read the output. The last section after
     "cache_read": 30000,
     "cache_creation": 15000,
     "context_window": 200000,
-    "context_used_pct": 51
+    "max_output": 32000,
+    "context_used_pct": 38
   },
   "tool_calls": 24,
   "git": {
@@ -87,6 +90,8 @@ When the background Bash task completes, read the output. The last section after
 
 - `context_warning: false` — safe to `--resume` this session for the next batch
 - `context_warning: true` — context usage is above 60%. Start a **new session** with `--prompt` instead of `--resume`
+
+**How context is measured:** The wrapper tracks per-turn token usage from the stream (not the aggregate which double-counts the system prompt across turns). It uses the **last turn's** token counts divided by the effective context window (`context_window - max_output`) to calculate the true point-in-time context usage. The `max_output` field shows how many tokens are reserved for the model's response.
 
 ### Batching Pattern
 
