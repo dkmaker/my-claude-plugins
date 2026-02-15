@@ -11,6 +11,12 @@ Ask the user (one question at a time):
    - `name` field in plugin.json
    - Namespace prefix for skills: `/my-claude-plugins:<name>:<skill>`
 
+   **IMPORTANT Naming Conventions:**
+   - ❌ **DO NOT** add suffixes like `-skill`, `-plugin`, `-tool`
+   - ❌ Bad: `playwright-cli-skill`, `web-search-plugin`, `my-tool-helper`
+   - ✅ Good: `playwright-cli`, `web-search`, `my-tool`
+   - **Reason**: The plugin type is already clear from context. Adding `-skill` or `-plugin` is redundant and verbose.
+
 2. **Plugin type**:
    - **Feature plugin** — hooks, skills, scripts, commands
    - **MCP server wrapper** — thin config wrapping an external MCP server
