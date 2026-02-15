@@ -28,9 +28,10 @@ run.sh alpha icon.png --remove --background "0,0,0" -o icon_flat.jpg
 
 **Notes:**
 - JPEG outputs from --transparent auto-save as PNG (JPEG has no alpha).
-- Tolerance applies per-channel: each of R, G, B must be within N.
-- **Feather** creates smooth antialiased edges: pixels within `tolerance` are fully transparent, pixels between `tolerance` and `tolerance + feather` get proportional alpha (0-255). Use `--feather 20-40` for typical antialiased edges.
-- For best results with background removal: use `--tolerance 10-20 --feather 30-50`.
+- **With `--feather`** (recommended): Uses HSV color space detection + Gaussian blur antialiasing + spill suppression. Detects background by hue (handles imprecise AI-generated colors), blurs the alpha mask for smooth edges, and removes background color contamination from outline pixels.
+- **Without `--feather`**: Uses simple RGB tolerance matching (binary transparency). Fast but produces hard edges and color fringe.
+- For AI-generated chroma key backgrounds: use `--tolerance 15 --feather 40`.
+- Requires numpy for the HSV/spill pipeline (falls back to basic RGB if numpy is missing).
 
 ## composite
 
