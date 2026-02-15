@@ -1,0 +1,9 @@
+{
+  "name": "image-tools",
+  "description": "Swiss army knife for image manipulation: resize, crop, convert, alpha, transform, and analyze images using Pillow.",
+  "version": "1.0.0",
+  "author": {
+    "name": "dkmaker"
+  },
+  "keywords": ["image", "resize", "crop", "convert", "alpha", "pillow", "manipulation"]
+}

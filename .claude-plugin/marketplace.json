@@ -107,6 +107,14 @@
       "version": "1.0.0",
       "keywords": ["search", "perplexity", "research", "web", "ai"],
       "category": "productivity"
+    },
+    {
+      "name": "image-tools",
+      "source": "./image-tools",
+      "description": "Swiss army knife for image manipulation: resize, crop, convert, alpha, transform, and analyze images using Pillow.",
+      "version": "1.0.0",
+      "keywords": ["image", "resize", "crop", "convert", "alpha", "pillow", "manipulation"],
+      "category": "creative"
     }
   ]
 }
