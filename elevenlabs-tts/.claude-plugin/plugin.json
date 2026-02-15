@@ -1,0 +1,12 @@
+{
+  "name": "elevenlabs-tts",
+  "description": "Voice feedback while coding. Claude speaks progress updates aloud via ElevenLabs API with local Piper TTS fallback.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Christian Pedersen"
+  },
+  "repository": "https://github.com/dkmaker/my-claude-plugins",
+  "license": "MIT",
+  "keywords": ["tts", "voice", "elevenlabs", "audio", "feedback", "accessibility"],
+  "outputStyles": "./output-styles/"
+}
