@@ -82,25 +82,42 @@ Find latest version, increment, archive previous in `archive/v{N}/`.
 
 When the user wants transparency, use a two-step process: generate with a **chroma key background**, then remove it with the `image-tools:image` skill afterwards.
 
-**Step 1 — Generate with magenta chroma key**: Add to your prompt:
-`"on a solid flat magenta (#FF00FF) background. The background must be perfectly uniform solid magenta RGB(255,0,255). No shadows, gradients, or lighting effects on the background."`
+### Step 1 — Choose chroma key color
 
-**Step 2 — Remove background with image-tools**: Use the `image-tools:image` skill to make it transparent.
-Note: Gemini won't produce exact magenta — it renders roughly (213,63,186). Sample the actual corner pixel, then remove:
+Pick the color that is **most different from the subject's dominant colors**:
+
+| Chroma Key | Prompt color name | Good for | Avoid when subject has |
+|------------|------------------|----------|----------------------|
+| **Magenta** `#FF00FF` | "magenta" | Most subjects, people, landscapes, animals | Pink/purple/magenta tones |
+| **Green** `#00FF00` | "bright green" or "lime green" | Pink/red/purple subjects, sunsets | Plants, nature, green clothing |
+| **Blue** `#0000FF` | "bright blue" or "pure blue" | Warm-toned subjects, fire, autumn | Sky, water, blue clothing |
+| **Yellow** `#FFFF00` | "bright yellow" | Dark subjects, night scenes, blue items | Gold, sunshine, blonde hair |
+
+**Default to magenta** unless the subject clearly conflicts. When in doubt, think about what the cartoon outlines and dominant fills will be.
+
+### Step 2 — Generate with chroma key
+
+Add to your prompt:
+`"on a solid flat [COLOR NAME] (#HEX) background. The background must be perfectly uniform solid [COLOR NAME]. No shadows, gradients, or lighting effects on the background."`
+
+### Step 3 — Remove background with image-tools
+
+Use the `image-tools:image` skill. Note: Gemini won't produce exact colors. Always sample the actual corner pixel first:
+
 ```bash
-# Sample actual background color (will vary per image)
+# Sample actual background color
 # from PIL import Image; print(Image.open("image.png").getpixel((0,0)))
 
-# Remove chroma key background with smooth edges
-run.sh alpha <image> --transparent "213,63,186" --tolerance 20 --feather 40 -o <output>
+# Remove chroma key with HSV detection + spill suppression
+run.sh alpha <image> --transparent "<actual R,G,B>" --tolerance 15 --feather 40 -o <output>
 
-# Trim empty space around subject
+# Trim empty space
 run.sh trim <output> -o <final>
 ```
 
-**Why magenta, not white?** White bleeds into light-colored subjects creating visible halos. Magenta is far from most subject colors, keeping removal clean.
+### When to use this
 
-**When to use this**: User mentions "transparent", "no background", "PNG with alpha", "cutout", or "sticker". **Always tell the user** you're using a chroma key approach since the result won't be transparent until the second step.
+User mentions "transparent", "no background", "PNG with alpha", "cutout", or "sticker". **Always tell the user** you're using a chroma key approach since the result won't be transparent until the second step.
 
 ## Reference
 
