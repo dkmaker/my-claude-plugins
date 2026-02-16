@@ -15,7 +15,8 @@ Replace all shell scripts (`speak.sh`, `tts-worker.sh`, `setup-piper.sh`) with a
 
 - **Single binary** replaces all shell scripts (speak.sh, tts-worker.sh, setup-piper.sh)
 - **ElevenLabs API only** — no local Piper fallback (simplifies scope)
-- **Pure Go audio** via `oto` (no CGo) + `go-mp3` for decoding
+- **Audio via oto v3** + `go-mp3` for decoding (requires CGo — native builds per platform)
+- **GitHub Actions matrix build** on native runners (ubuntu/macos/windows) to handle CGo
 - **GitHub Releases** distribution with auto-download in SessionStart hook
 
 ## Architecture
@@ -122,9 +123,14 @@ elevenlabs-tts/
 
 ### GitHub Actions Workflow
 
-1. Trigger on version tag push (`v*`)
-2. Cross-compile with `GOOS`/`GOARCH`
-3. Upload binaries to GitHub Release
+1. Trigger on version tag push (`speak-v*`)
+2. Matrix build on native runners: `ubuntu-latest`, `macos-latest`, `windows-latest`
+3. Each runner builds natively with CGo enabled (required by oto v3)
+4. Upload binaries to GitHub Release
+5. Build targets per runner:
+   - ubuntu: `linux/amd64`
+   - macos: `darwin/amd64`, `darwin/arm64` (universal binary via lipo)
+   - windows: `windows/amd64`
 
 ### SessionStart Hook
 
