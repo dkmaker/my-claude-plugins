@@ -1,0 +1,66 @@
+name: Validate Plugins
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+  push:
+    branches: [main]
+
+jobs:
+  # ─── Job 1: Secret Scanning ──────────────────────────────────────────────────
+
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --results=verified,unknown
+
+  # ─── Job 2: Plugin Validation ────────────────────────────────────────────────
+
+  plugin-validation:
+    name: Plugin Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run plugin validation
+        run: .github/scripts/validate-plugins.sh
+
+  # ─── Job 3: Claude Code Review (PRs only) ────────────────────────────────────
+
+  claude-review:
+    name: Claude Code Review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      issues: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          # Static prompt - no untrusted user input is interpolated here
+          prompt: |
+            Review this PR for the my-claude-plugins marketplace. Check:
+            1. Plugin conventions: valid plugin.json, hooks.json structure, SKILL.md frontmatter
+            2. Version bumps match change type (feat = minor, fix = patch)
+            3. Code quality in shell scripts and JSON files
+            4. No hardcoded secrets, API keys, or credentials
+            5. marketplace.json consistency with plugin directories
