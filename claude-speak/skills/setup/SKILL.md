@@ -1,6 +1,6 @@
 ---
 name: setup
-description: Configure claude-speak TTS - set up API key, choose voices, test playback, and manage settings
+description: Configure claude-speak TTS - set up API key, choose voices, test playback, fix PATH issues, and manage settings
 disable-model-invocation: true
 ---
 
@@ -8,97 +8,191 @@ disable-model-invocation: true
 
 Help the user configure voice feedback for Claude Code.
 
-## API Key Setup
-
-### Step 1: Check if API key exists
+## First: Check Current Status
 
 ```bash
+echo "=== claude-speak Status ==="
+echo ""
+
+# Check binary location
+if [ -f "$HOME/.local/bin/speak" ]; then
+  version=$("$HOME/.local/bin/speak" --version 2>/dev/null || echo "unknown")
+  echo "✓ Binary installed: ~/.local/bin/speak (v$version)"
+else
+  echo "✗ Binary not found at ~/.local/bin/speak"
+fi
+
+# Check if in PATH
+if command -v speak >/dev/null 2>&1; then
+  echo "✓ speak command available in PATH"
+  echo "  Location: $(which speak)"
+else
+  echo "✗ speak command NOT in PATH"
+fi
+
+# Check API key
 if [ -n "$ELEVENLABS_API_KEY" ]; then
   echo "✓ ELEVENLABS_API_KEY is set"
 else
   echo "✗ ELEVENLABS_API_KEY is not set"
 fi
+
+# Check worker daemon
+if [ -f ~/.claude/tts/worker.pid ]; then
+  pid=$(cat ~/.claude/tts/worker.pid)
+  if kill -0 "$pid" 2>/dev/null; then
+    echo "✓ Worker daemon running (PID: $pid)"
+  else
+    echo "⚠️  Stale PID file (daemon not running)"
+  fi
+else
+  echo "ℹ️  No worker running (starts automatically on first speak command)"
+fi
 ```
 
-### Step 2: If missing, guide user to get one
+Based on the status, proceed with the relevant section below.
+
+---
+
+## Fix PATH Issues
+
+If `speak` is installed but not in PATH, fix it based on your platform:
+
+### Linux / macOS
+
+Check if `~/.local/bin` is in your PATH:
+
+```bash
+echo "$PATH" | grep -q "$HOME/.local/bin" && echo "✓ ~/.local/bin is in PATH" || echo "✗ ~/.local/bin NOT in PATH"
+```
+
+If not in PATH, add it to your shell profile:
+
+**Bash:**
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+**Zsh:**
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+**Fish:**
+```bash
+fish_add_path ~/.local/bin
+```
+
+### Windows
+
+On Windows, the binary is at `%USERPROFILE%\.local\bin\speak.exe`. Add this directory to your user PATH:
+
+**PowerShell (run as Administrator):**
+```powershell
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+$newPath = "$env:USERPROFILE\.local\bin"
+if ($userPath -notlike "*$newPath*") {
+    [Environment]::SetEnvironmentVariable("Path", "$userPath;$newPath", "User")
+    Write-Host "Added to PATH. Restart your terminal."
+}
+```
+
+**Or via GUI:**
+1. Search for "Environment Variables" in Start menu
+2. Click "Edit environment variables for your account"
+3. Select "Path" → "Edit"
+4. Click "New" → Add `%USERPROFILE%\.local\bin`
+5. Click OK, restart terminal
+
+After fixing PATH, verify:
+```bash
+speak --version
+```
+
+---
+
+## API Key Setup
+
+### Step 1: Get an API key
 
 1. Go to [elevenlabs.io](https://elevenlabs.io) and create an account (free tier available)
 2. Click profile icon (bottom-left) → **API Keys**
 3. Click **Create API Key** → enable **all permissions** (especially `voices_read` for listing voices)
 4. Copy the API key
 
-### Step 3: Store API key securely
+### Step 2: Store API key securely
 
-**Recommended approach:** Store in Claude Code settings (never committed to git)
+**Recommended: Claude Code settings** (never committed to git)
 
-Check which settings file to use:
 ```bash
-# Check for project-local settings
+# Determine which settings file to use
 if [ -f .claude/settings.local.json ]; then
   SETTINGS_FILE=".claude/settings.local.json"
-  echo "Using project settings: $SETTINGS_FILE"
 elif [ -f ~/.claude/settings.json ]; then
   SETTINGS_FILE="$HOME/.claude/settings.json"
-  echo "Using global settings: $SETTINGS_FILE"
 else
+  # Create project-local settings
+  mkdir -p .claude
   SETTINGS_FILE=".claude/settings.local.json"
-  echo "Will create project settings: $SETTINGS_FILE"
+  echo '{}' > "$SETTINGS_FILE"
 fi
+
+echo "Using settings file: $SETTINGS_FILE"
+
+# Add API key (replace 'sk-...' with your actual key)
+jq '.env.ELEVENLABS_API_KEY = "sk-your-api-key-here"' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+
+echo "✓ API key added to $SETTINGS_FILE"
 ```
 
-**Add API key to settings:**
-
-Read the current settings file, add the `env` section with `ELEVENLABS_API_KEY`, and write it back. Use `jq` for safe JSON manipulation:
+**Ensure .gitignore protects it:**
 
 ```bash
-# Ensure .claude directory exists for project-local settings
-mkdir -p .claude
-
-# Add API key to settings
-jq '.env.ELEVENLABS_API_KEY = "sk-..."' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
-```
-
-**Ensure .gitignore covers it:**
-
-```bash
-# Check if .claude/settings.local.json is in .gitignore
-if ! git check-ignore -q .claude/settings.local.json 2>/dev/null; then
-  echo "⚠️  .claude/settings.local.json not in .gitignore"
-  echo "Add this line to .gitignore:"
-  echo "  .claude/settings.local.json"
-
-  # Optionally add it automatically
-  if grep -q "\.claude/settings\.local\.json" .gitignore 2>/dev/null; then
-    echo "✓ Already in .gitignore"
+if [ "$SETTINGS_FILE" = ".claude/settings.local.json" ]; then
+  # Check if already in .gitignore
+  if git check-ignore -q .claude/settings.local.json 2>/dev/null; then
+    echo "✓ .claude/settings.local.json is already in .gitignore"
   else
-    echo ".claude/settings.local.json" >> .gitignore
-    echo "✓ Added to .gitignore"
+    echo "⚠️  Adding .claude/settings.local.json to .gitignore"
+    if [ -f .gitignore ]; then
+      if ! grep -q "\.claude/settings\.local\.json" .gitignore; then
+        echo ".claude/settings.local.json" >> .gitignore
+        echo "✓ Added to .gitignore"
+      fi
+    else
+      echo ".claude/settings.local.json" > .gitignore
+      echo "✓ Created .gitignore"
+    fi
   fi
 fi
 ```
 
-**Alternative (simpler but less secure):** Add to shell profile
+**Alternative: Shell profile** (simpler but less secure)
 
 ```bash
 # Add to ~/.bashrc or ~/.zshrc
-echo 'export ELEVENLABS_API_KEY="sk-..."' >> ~/.bashrc
+echo 'export ELEVENLABS_API_KEY="sk-your-api-key-here"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
 On Windows PowerShell:
 ```powershell
-[Environment]::SetEnvironmentVariable("ELEVENLABS_API_KEY", "sk-...", "User")
+[Environment]::SetEnvironmentVariable("ELEVENLABS_API_KEY", "sk-your-api-key-here", "User")
 ```
 
-### Step 4: Validate API key
+### Step 3: Validate API key
 
 Test the API key works:
 
 ```bash
 curl -s "https://api.elevenlabs.io/v1/voices" \
   -H "xi-api-key: $ELEVENLABS_API_KEY" | \
-  python3 -c 'import json,sys; d=json.load(sys.stdin); print("✓ API key valid" if "voices" in d else f"✗ Error: {d.get(\"detail\", {}).get(\"message\", \"Unknown error\")}")'
+  python3 -c 'import json,sys; d=json.load(sys.stdin); print("✓ API key valid - found", len(d.get("voices", [])), "voices") if "voices" in d else print("✗ Error:", d.get("detail", {}).get("message", "Unknown error"))'
 ```
+
+---
 
 ## Voice Selection
 
@@ -107,10 +201,10 @@ curl -s "https://api.elevenlabs.io/v1/voices" \
 ```bash
 curl -s "https://api.elevenlabs.io/v1/voices" \
   -H "xi-api-key: $ELEVENLABS_API_KEY" | \
-  python3 -c '
-import json
-data = json.load(open("/dev/stdin"))
-print(f"{"ID":<24} {"Name":<45} {"Gender":<10} {"Age":<15} {"Accent"}")
+  python3 << 'PYEOF'
+import json, sys
+data = json.load(sys.stdin)
+print(f"{'ID':<26} {'Name':<45} {'Gender':<10} {'Age':<15} {'Accent'}")
 print("-" * 110)
 for v in data["voices"]:
     labels = v.get("labels", {})
@@ -119,43 +213,47 @@ for v in data["voices"]:
     gender = labels.get("gender", "")
     age = labels.get("age", "")
     accent = labels.get("accent", "")
-    print(f"{vid:<24} {name:<45} {gender:<10} {age:<15} {accent}")
-' | head -30
+    print(f"{vid:<26} {name:<45} {gender:<10} {age:<15} {accent}")
+PYEOF
 ```
 
-### Browse voices in browser
-
-Send user to: https://elevenlabs.io/voice-library
-
-They can preview voices and copy the voice ID.
+Or browse voices in your browser: https://elevenlabs.io/voice-library
 
 ### Test a voice
 
 ```bash
-# Test with a specific voice ID
+# Test with a specific voice ID (replace with any ID from the list above)
 ELEVENLABS_VOICE_ID="IKne3meq5aSn9XLyUdCD" speak "Hello, this is a voice test"
+```
 
-# Or test multiple voices
+Test multiple voices to compare:
+
+```bash
+# Replace these IDs with ones from your list
 for vid in "IKne3meq5aSn9XLyUdCD" "cjVigY5qzO86Huf0OWal" "nPczCjzI2devNBz1zQrb"; do
   echo "Testing voice: $vid"
-  ELEVENLABS_VOICE_ID="$vid" speak "This is a voice preview"
+  ELEVENLABS_VOICE_ID="$vid" speak "This is a voice preview. Testing the sound quality."
   sleep 8  # Wait for audio to finish
 done
 ```
 
 ### Set preferred voice permanently
 
-Add to settings file:
+**In Claude Code settings:**
 
 ```bash
 jq '.env.ELEVENLABS_VOICE_ID = "IKne3meq5aSn9XLyUdCD"' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
+echo "✓ Voice ID saved to $SETTINGS_FILE"
 ```
 
-Or add to shell profile:
+**Or in shell profile:**
 
 ```bash
 echo 'export ELEVENLABS_VOICE_ID="IKne3meq5aSn9XLyUdCD"' >> ~/.bashrc
+source ~/.bashrc
 ```
+
+---
 
 ## Optional Configuration
 
@@ -168,50 +266,70 @@ echo 'export ELEVENLABS_VOICE_ID="IKne3meq5aSn9XLyUdCD"' >> ~/.bashrc
 jq '.env.ELEVENLABS_MODEL = "eleven_multilingual_v2"' "$SETTINGS_FILE" > "$SETTINGS_FILE.tmp" && mv "$SETTINGS_FILE.tmp" "$SETTINGS_FILE"
 ```
 
+---
+
 ## Troubleshooting
 
-### Check if speak binary is installed
+### Binary won't execute
 
+Check file permissions:
 ```bash
-which speak
-speak --version
+ls -la ~/.local/bin/speak
+chmod +x ~/.local/bin/speak
 ```
 
-Expected: `1.0.0` (or later)
+### Download failed
 
-### Check if worker daemon is running
-
+Manual download:
 ```bash
-if [ -f ~/.claude/tts/worker.pid ]; then
-  pid=$(cat ~/.claude/tts/worker.pid)
-  if kill -0 "$pid" 2>/dev/null; then
-    echo "✓ Worker daemon running (PID: $pid)"
-  else
-    echo "✗ Stale PID file (daemon not running)"
-  fi
-else
-  echo "✗ No worker running"
-fi
+# Replace {VERSION} and {PLATFORM} with your values
+curl -fsSL "https://github.com/dkmaker/claude-speak/releases/download/v{VERSION}/speak-{PLATFORM}" \
+  -o ~/.local/bin/speak
+chmod +x ~/.local/bin/speak
+```
+
+Example for Linux:
+```bash
+curl -fsSL "https://github.com/dkmaker/claude-speak/releases/download/v1.0.0/speak-linux-amd64" \
+  -o ~/.local/bin/speak
+chmod +x ~/.local/bin/speak
 ```
 
 ### Check daemon logs
 
 ```bash
-tail -20 ~/.claude/tts/speak.log
+tail -50 ~/.claude/tts/speak.log
 ```
 
-### Manually restart daemon
+### Restart daemon
 
 ```bash
 speak --stop  # Kill current worker
 speak "Test message"  # Starts fresh daemon
 ```
 
-## Summary
+### Test basic playback
 
-1. Get API key from elevenlabs.io with all permissions enabled
-2. Store in Claude Code settings (`.claude/settings.local.json` or `~/.claude/settings.json`)
-3. Ensure `.claude/settings.local.json` is in `.gitignore`
-4. List voices and test them
-5. Set preferred voice in settings
-6. Use `speak "message"` to test
+```bash
+speak "Testing one two three"
+```
+
+If you hear audio, it's working. If not:
+- Check API key is valid
+- Check you have internet connection
+- Check daemon logs at `~/.claude/tts/speak.log`
+- On Linux: verify audio device works (`paplay /usr/share/sounds/alsa/Front_Center.wav`)
+
+---
+
+## Quick Setup Checklist
+
+Run through this if setting up from scratch:
+
+1. ✓ Binary installed (`~/.local/bin/speak --version`)
+2. ✓ Binary in PATH (`which speak`)
+3. ✓ API key obtained (elevenlabs.io)
+4. ✓ API key stored (settings.json or shell profile)
+5. ✓ API key validated (curl test above)
+6. ✓ Voice selected and tested
+7. ✓ Test playback works (`speak "hello"`)

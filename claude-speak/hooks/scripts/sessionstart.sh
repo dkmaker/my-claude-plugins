@@ -1,9 +1,8 @@
 #!/bin/bash
 # SessionStart hook for claude-speak plugin
-# Downloads the speak binary from dkmaker/claude-speak releases and ensures it's in PATH
+# Downloads the speak binary from dkmaker/claude-speak releases
 
 REPO="dkmaker/claude-speak"
-TTS_DIR="$HOME/.claude/tts"
 PLUGIN_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 VERSION_FILE="$PLUGIN_DIR/.claude-plugin/plugin.json"
 
@@ -41,10 +40,14 @@ if [[ "$PLATFORM" == windows-* ]]; then
     BINARY_NAME="speak.exe"
 fi
 
-BINARY_PATH="$TTS_DIR/$BINARY_NAME"
+# Install directly to ~/.local/bin (standard user binary location)
+BINARY_PATH="$HOME/.local/bin/$BINARY_NAME"
 
-# Create directories
-mkdir -p "$TTS_DIR" "$HOME/.local/bin"
+# Create directory
+mkdir -p "$HOME/.local/bin"
+
+# Also ensure runtime dir exists for queue/worker files
+mkdir -p "$HOME/.claude/tts"
 
 # Check if we need to download
 need_download=false
@@ -66,33 +69,37 @@ if [ "$need_download" = true ] && [ -n "$EXPECTED_VERSION" ]; then
 
     if curl -fsSL --connect-timeout 10 "$download_url" -o "$BINARY_PATH.tmp" 2>/dev/null; then
         mv "$BINARY_PATH.tmp" "$BINARY_PATH"
-        chmod +x "$BINARY_PATH"
+        chmod +x "$BINARY_PATH" 2>/dev/null
     else
         rm -f "$BINARY_PATH.tmp"
-        # Download failed — try to continue with existing binary if any
+        # Download failed — report error below
     fi
 fi
 
-# Create symlink in PATH
-if [[ "$PLATFORM" != windows-* ]]; then
-    ln -sf "$BINARY_PATH" "$HOME/.local/bin/speak"
-fi
-
 # Kill stale worker so it restarts with current env
-if [ -f "$TTS_DIR/worker.pid" ]; then
-    pid=$(cat "$TTS_DIR/worker.pid")
+if [ -f "$HOME/.claude/tts/worker.pid" ]; then
+    pid=$(cat "$HOME/.claude/tts/worker.pid")
     kill "$pid" 2>/dev/null
-    rm -f "$TTS_DIR/worker.pid"
+    rm -f "$HOME/.claude/tts/worker.pid"
 fi
 
 # Determine status
-if [ -f "$BINARY_PATH" ] && [ -n "$ELEVENLABS_API_KEY" ]; then
+if [ -f "$BINARY_PATH" ]; then
     version=$("$BINARY_PATH" --version 2>/dev/null || echo "unknown")
-    status="Voice feedback ready (ElevenLabs, speak v${version})"
-elif [ -f "$BINARY_PATH" ]; then
-    status="Voice feedback: speak binary installed but ELEVENLABS_API_KEY not set"
+
+    # Check if speak is actually in PATH
+    if command -v speak >/dev/null 2>&1; then
+        if [ -n "$ELEVENLABS_API_KEY" ]; then
+            status="✓ Voice feedback ready (speak v${version})"
+        else
+            status="⚠️  speak binary installed but ELEVENLABS_API_KEY not set. Run /claude-speak:setup to configure."
+        fi
+    else
+        # Binary exists but not in PATH
+        status="⚠️  speak binary downloaded to $BINARY_PATH but not in PATH. Run /claude-speak:setup to fix."
+    fi
 else
-    status="Voice feedback: Failed to download speak binary. Check https://github.com/${REPO}/releases"
+    status="✗ Failed to download speak binary. Run /claude-speak:setup for help or check https://github.com/${REPO}/releases"
 fi
 
 cat <<EOF
