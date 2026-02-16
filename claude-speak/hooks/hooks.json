@@ -1,0 +1,16 @@
+{
+  "description": "Downloads speak binary and ensures it is in PATH on session start",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PLUGIN_ROOT}/hooks/scripts/sessionstart.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

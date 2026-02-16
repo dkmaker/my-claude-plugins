@@ -98,10 +98,10 @@
       "category": "productivity"
     },
     {
-      "name": "elevenlabs-tts",
-      "source": "./elevenlabs-tts",
-      "description": "Voice feedback while coding. Claude speaks progress updates aloud via ElevenLabs API with local Piper TTS fallback.",
-      "keywords": ["tts", "voice", "elevenlabs", "audio", "feedback", "accessibility"],
+      "name": "claude-speak",
+      "source": "./claude-speak",
+      "description": "Cross-platform voice feedback while coding. Claude speaks progress updates aloud via ElevenLabs API. Supports Linux, macOS, and Windows.",
+      "keywords": ["tts", "voice", "elevenlabs", "audio", "feedback", "accessibility", "cross-platform"],
       "category": "accessibility"
     }
   ]
