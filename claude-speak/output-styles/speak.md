@@ -1,5 +1,5 @@
 ---
-name: tts
+name: speak
 description: Voice feedback mode - speaks progress updates aloud while coding
 keep-coding-instructions: true
 ---
