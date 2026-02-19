@@ -96,17 +96,11 @@ git commit -m "feat: add specific feature"
 
 ## Execution Handoff
 
-After saving the plan, offer execution choice:
+After saving the plan, use the `AskUserQuestion` tool to present the execution choice. Include a single-select question with these 3 options:
 
-**"Plan complete and saved to `docs/plans/<filename>.md`. Three execution options:**
-
-**1. Subagent-Driven (this session)** - I dispatch fresh subagent per task, review between tasks, fast iteration
-
-**2. Parallel Session (separate)** - Open new session with executing-plans, batch execution with checkpoints
-
-**3. Headless Runner (background)** - I launch claude -p in background, minimal context cost, auto context awareness, structured results back
-
-**Which approach?"**
+- **Subagent-Driven (this session)** — Fresh subagent per task, review between tasks, fast iteration
+- **Parallel Session (separate)** — Open new session with executing-plans, batch execution with checkpoints
+- **Headless Runner (background)** — Background claude -p sessions, minimal context cost, structured results back
 
 **If Subagent-Driven chosen:**
 - **REQUIRED SUB-SKILL:** Use superpowers:subagent-driven-development

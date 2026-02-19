@@ -48,20 +48,14 @@ Or ask: "This branch split from main - is that correct?"
 
 ### Step 3: Present Options
 
-Present exactly these 4 options:
+Use the `AskUserQuestion` tool to present exactly these 4 options as a single-select question:
 
-```
-Implementation complete. What would you like to do?
+- **Merge locally** — Merge back to `<base-branch>` on this machine
+- **Create Pull Request** — Push branch and open a PR for review
+- **Keep as-is** — Leave the branch, handle it later
+- **Discard** — Delete the branch and all work
 
-1. Merge back to <base-branch> locally
-2. Push and create a Pull Request
-3. Keep the branch as-is (I'll handle it later)
-4. Discard this work
-
-Which option?
-```
-
-**Don't add explanation** - keep options concise.
+Keep descriptions concise.
 
 ### Step 4: Execute Choice
 
