@@ -1,11 +1,47 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-INSTALL_DIR="$HOME/.local/bin"
-INSTALL_PATH="$INSTALL_DIR/websearch"
 LAST_CHECK_FILE="$HOME/.claude/.websearch-last-update-check"
 CHECK_INTERVAL=86400  # 24 hours
 REPO="dkmaker/websearch-cli"
+
+# --- Platform detection ---
+
+detect_platform() {
+  OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+  ARCH=$(uname -m)
+
+  case "$ARCH" in
+    x86_64)        ARCH="amd64" ;;
+    aarch64|arm64) ARCH="arm64" ;;
+    *) return 1 ;;
+  esac
+
+  # Normalize OS and set platform-specific values
+  case "$OS" in
+    linux)
+      INSTALL_DIR="$HOME/.local/bin"
+      BIN_NAME="websearch"
+      ARCHIVE_EXT="tar.gz"
+      ;;
+    darwin)
+      INSTALL_DIR="$HOME/.local/bin"
+      BIN_NAME="websearch"
+      ARCHIVE_EXT="tar.gz"
+      ;;
+    mingw*|msys*|cygwin*)
+      OS="windows"
+      INSTALL_DIR="$HOME/.local/bin"
+      BIN_NAME="websearch.exe"
+      ARCHIVE_EXT="zip"
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+
+  INSTALL_PATH="$INSTALL_DIR/$BIN_NAME"
+}
 
 # --- Auto-update logic (runs at most once every 24 hours) ---
 
@@ -19,16 +55,6 @@ should_check_update() {
 }
 
 install_or_update() {
-  # Determine platform
-  local os arch
-  os=$(uname -s | tr '[:upper:]' '[:lower:]')
-  arch=$(uname -m)
-  case "$arch" in
-    x86_64)  arch="amd64" ;;
-    aarch64|arm64) arch="arm64" ;;
-    *) return 1 ;;
-  esac
-
   # Get latest release tag
   local latest_tag
   latest_tag=$(gh release view --repo "$REPO" --json tagName -q '.tagName' 2>/dev/null) || return 1
@@ -37,30 +63,50 @@ install_or_update() {
   # Check if current version matches
   if [ -x "$INSTALL_PATH" ]; then
     local current_version
-    current_version=$("$INSTALL_PATH" --version 2>/dev/null | grep -oP '[\d.]+' | head -1 || echo "")
+    current_version=$("$INSTALL_PATH" --version 2>/dev/null | sed -n 's/.*\([0-9]\+\.[0-9]\+\.[0-9]\+\).*/\1/p' | head -1 || echo "")
     if [ "$current_version" = "$latest_version" ]; then
       date +%s > "$LAST_CHECK_FILE"
       return 0
     fi
   fi
 
-  # Download and install
-  local asset_pattern="websearch-cli_${latest_version}_${os}_${arch}.tar.gz"
+  # Download and extract
+  local asset_name="websearch-cli_${latest_version}_${OS}_${ARCH}.${ARCHIVE_EXT}"
   local tmp_dir
   tmp_dir=$(mktemp -d)
   trap "rm -rf '$tmp_dir'" EXIT
 
-  gh release download "$latest_tag" --repo "$REPO" --pattern "$asset_pattern" --dir "$tmp_dir" 2>/dev/null || return 1
-  tar -xzf "$tmp_dir/$asset_pattern" -C "$tmp_dir" 2>/dev/null || return 1
+  gh release download "$latest_tag" --repo "$REPO" --pattern "$asset_name" --dir "$tmp_dir" 2>/dev/null || return 1
+
+  if [ "$ARCHIVE_EXT" = "zip" ]; then
+    unzip -o "$tmp_dir/$asset_name" -d "$tmp_dir" 2>/dev/null || return 1
+  else
+    tar -xzf "$tmp_dir/$asset_name" -C "$tmp_dir" 2>/dev/null || return 1
+  fi
 
   mkdir -p "$INSTALL_DIR"
-  mv "$tmp_dir/websearch" "$INSTALL_PATH"
+  mv "$tmp_dir/$BIN_NAME" "$INSTALL_PATH"
   chmod +x "$INSTALL_PATH"
   date +%s > "$LAST_CHECK_FILE"
 
   trap - EXIT
   rm -rf "$tmp_dir"
   return 0
+}
+
+# --- Main ---
+
+detect_platform || {
+  cat <<'EOF'
+{
+  "hookSpecificOutput": {
+    "hookEventName": "SessionStart",
+    "additionalContext": "# Websearch CLI\n\nUnsupported platform. The websearch plugin requires Linux, macOS, or Windows (x86_64 or arm64)."
+  },
+  "systemMessage": "WARNING: websearch unsupported platform"
+}
+EOF
+  exit 0
 }
 
 UPDATE_MSG=""
@@ -77,8 +123,6 @@ if [ -x "$INSTALL_PATH" ]; then
   WEBSEARCH_BIN="$INSTALL_PATH"
 elif command -v websearch &>/dev/null; then
   WEBSEARCH_BIN="websearch"
-elif [ -x "$HOME/code/dkmaker/websearch-cli/websearch" ]; then
-  WEBSEARCH_BIN="$HOME/code/dkmaker/websearch-cli/websearch"
 fi
 
 # --- Output hook JSON ---
