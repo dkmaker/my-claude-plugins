@@ -2,7 +2,7 @@
 name: websearch
 description: Web search, developer research, and library docs. Use for searching the web, looking up docs, debugging errors, researching patterns, bootstrapping projects, resolving dependencies, exploring GitHub code, or finding code examples.
 argument-hint: "[query or topic]"
-allowed-tools: Bash(websearch *), Bash(~/.local/bin/websearch *), Read, AskUserQuestion, TaskCreate, TaskUpdate, TaskList, mcp__context7__*
+allowed-tools: Bash(websearch *), Bash(~/.local/bin/websearch *), Read, AskUserQuestion, TaskCreate, TaskUpdate, TaskList, mcp__plugin_websearch_context7__*
 ---
 
 # Websearch — Web Search & Developer Research
@@ -118,7 +118,7 @@ This plugin includes the **Context7 MCP server** for version-specific library do
 - Debugging errors → use websearch (GitHub issues, Stack Overflow)
 - Finding repos or projects → use websearch `-p github`
 
-**Workflow:** First `resolve-library-id` to find the library ID, then `query-docs` with a specific question. Context7 is slower and more token-expensive than websearch, so only use it when library-specific accuracy matters.
+**Workflow:** First `mcp__plugin_websearch_context7__resolve-library-id` to find the library ID, then `mcp__plugin_websearch_context7__query-docs` with a specific question. Context7 is slower and more token-expensive than websearch, so only use it when library-specific accuracy matters.
 
 ## Quick reference
 

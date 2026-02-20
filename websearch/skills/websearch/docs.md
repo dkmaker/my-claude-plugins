@@ -27,4 +27,4 @@ websearch -p github "library-name"
 - Default `-m ask` works well for straightforward "how to use X" questions
 - `--include-sources` when you need to cite documentation URLs
 - For working code snippets and usage examples, also see [examples.md](examples.md)
-- For **version-specific library API docs**, prefer Context7 (`resolve-library-id` → `query-docs`) over websearch — it pulls from official docs and is more accurate for specific API questions
+- For **version-specific library API docs**, prefer Context7 (`mcp__plugin_websearch_context7__resolve-library-id` → `mcp__plugin_websearch_context7__query-docs`) over websearch — it pulls from official docs and is more accurate for specific API questions

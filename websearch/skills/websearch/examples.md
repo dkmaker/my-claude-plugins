@@ -40,4 +40,4 @@ websearch -p github -m code --gh-path test "library-name usage"
 - `--gh-repo` searches within a specific repo — useful for finding examples in a library's own codebase
 - Combine with `-m ask` or `-m reason` to get explained examples from web articles
 - For config/setup examples, search for the exact filename (docker-compose.yml, pyproject.toml, etc.)
-- For **official library code examples**, use Context7 (`resolve-library-id` → `query-docs`) — it returns examples straight from the library's own documentation
+- For **official library code examples**, use Context7 (`mcp__plugin_websearch_context7__resolve-library-id` → `mcp__plugin_websearch_context7__query-docs`) — it returns examples straight from the library's own documentation
