@@ -98,13 +98,6 @@
       "category": "testing"
     },
     {
-      "name": "web-search",
-      "source": "./web-search",
-      "description": "Web search using Perplexity AI for search, research, reasoning, and question answering with result archiving",
-      "keywords": ["search", "perplexity", "research", "web", "ai"],
-      "category": "productivity"
-    },
-    {
       "name": "claude-speak",
       "source": "./claude-speak",
       "description": "Cross-platform voice feedback while coding. Claude speaks progress updates aloud via ElevenLabs API. Supports Linux, macOS, and Windows.",
