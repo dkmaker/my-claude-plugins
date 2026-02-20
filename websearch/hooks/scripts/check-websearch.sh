@@ -137,9 +137,10 @@ The websearch CLI is installed and managed automatically by this plugin.
 **CRITICAL RULES:**
 
 1. **NEVER use the built-in WebSearch tool.** Always use the \`/websearch\` skill instead. The skill wraps the websearch CLI with proper mode selection, interview flows, and Context7 integration.
-2. **NEVER rely on pre-trained model knowledge when the user asks you to search, look up, or find information.** Always perform an actual search via \`/websearch\`.
-3. **Any question about current/recent information (after your knowledge cutoff) MUST be searched** — do not guess or approximate from training data.
-4. Do NOT call the \`websearch\` CLI directly — always invoke the \`/websearch\` skill.
+2. **NEVER use the Task tool with \`subagent_type='web-search'\`.** That is a built-in agent that bypasses the websearch skill. Always use \`Skill: websearch:websearch\` instead.
+3. **NEVER rely on pre-trained model knowledge when the user asks you to search, look up, or find information.** Always perform an actual search via \`/websearch\`.
+4. **Any question about current/recent information (after your knowledge cutoff) MUST be searched** — do not guess or approximate from training data.
+5. Do NOT call the \`websearch\` CLI directly — always invoke the \`/websearch\` skill.
 
 If the CLI needs troubleshooting or manual update, use \`/websearch\` — the skill includes installation and update guidance."
 else
