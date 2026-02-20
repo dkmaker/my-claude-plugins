@@ -106,6 +106,23 @@ Once approved, create a task per search in the plan, then execute them — marki
 
 **If you must use `-m research`**, run it in the background with `run_in_background: true` on the Bash tool, since it can take up to 5 minutes. Continue other work while waiting.
 
+## Context7 — library documentation
+
+This plugin includes the **Context7 MCP server** for version-specific library documentation. Use the Context7 tools (`resolve-library-id` then `query-docs`) when:
+
+- Looking up **specific library/framework API** usage (e.g., "how does Next.js App Router handle layouts")
+- The user is working with a **specific version** of a library and needs accurate docs
+- You need **code examples from official docs** rather than blog posts or Stack Overflow
+- **websearch returns outdated or generic info** about a rapidly evolving library
+
+**Do NOT use Context7 for:**
+- General web questions, news, or non-library topics → use websearch
+- Architecture decisions or pattern comparisons → use websearch `-m reason`
+- Debugging errors → use websearch (GitHub issues, Stack Overflow)
+- Finding repos or projects → use websearch `-p github`
+
+**Workflow:** First `resolve-library-id` to find the library ID, then `query-docs` with a specific question. Context7 is slower and more token-expensive than websearch, so only use it when library-specific accuracy matters.
+
 ## Quick reference
 
 ```bash
