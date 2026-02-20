@@ -6,7 +6,7 @@ description: >
   researching best practices and design patterns, finding project templates and
   setup guides, resolving dependency conflicts, or exploring GitHub repositories
   and code. Handles both general web queries and development-specific research.
-allowed-tools: Bash(websearch *), Bash(~/.local/bin/websearch *), Read, AskUserQuestion
+allowed-tools: Bash(websearch *), Bash(~/.local/bin/websearch *), Read, AskUserQuestion, TaskCreate, TaskUpdate, TaskList
 ---
 
 # Websearch — Web Search & Developer Research
@@ -50,15 +50,40 @@ Options: **Quick search** (proceed immediately) / **Interview first** (refine th
 
 ### Interview process (if chosen or requested directly)
 
-Go 2-3 levels deep to expand the topic. Use AskUserQuestion for each level:
+When the user confirms interview, immediately create tasks to track the process:
 
-**Level 1 — Scope:** What specific aspects matter? What's the context? (e.g., "Which parts of auth are you exploring — session management, OAuth providers, or token strategy?")
+```
+TaskCreate: "Interview: scope and context" (activeForm: "Interviewing about scope")
+TaskCreate: "Interview: constraints and requirements" (activeForm: "Interviewing about constraints")
+TaskCreate: "Interview: priorities" (activeForm: "Interviewing about priorities")
+TaskCreate: "Build and approve search plan" (activeForm: "Building search plan")
+TaskCreate: "Execute search plan" (activeForm: "Executing searches")
+TaskCreate: "Synthesize results" (activeForm: "Synthesizing research results")
+```
 
-**Level 2 — Constraints:** What tech stack, scale, or requirements apply? What have you already tried or ruled out? (e.g., "Are you using a specific framework? Any requirements around SSO or multi-tenancy?")
+Mark each task in_progress as you start it, completed when done.
 
-**Level 3 (if needed) — Priorities:** What matters most — performance, simplicity, security? Any dealbreakers? (e.g., "Is minimizing third-party dependencies a priority, or is a managed service fine?")
+**Level 1 — Scope** (mark task in_progress): What specific aspects matter? What's the context? Use AskUserQuestion with concrete options based on the topic. (e.g., "Which parts of auth are you exploring?" with options: "Session management", "OAuth providers", "Token strategy")
 
-After the interview, build a **search plan**: a list of 3-6 focused searches from different angles using `-m ask`/`-m reason`/`-p github`, covering all dimensions uncovered. Present the plan briefly, then execute.
+**Level 2 — Constraints** (mark task in_progress): What tech stack, scale, or requirements apply? What have you already tried or ruled out? Use AskUserQuestion. (e.g., "Are you using a specific framework?" with relevant options)
+
+**Level 3 — Priorities** (mark task in_progress, skip if already clear): What matters most — performance, simplicity, security? Any dealbreakers? Use AskUserQuestion.
+
+### Search plan proposal (requires approval)
+
+After the interview, build a **search plan** and **present it for approval** using AskUserQuestion:
+
+List 3-6 specific searches you plan to run, each with:
+- The exact websearch command (mode, profile, flags)
+- What angle or dimension this search covers
+- How it connects to what the user told you
+
+Ask: "Here's my search plan based on our discussion. Should I proceed?"
+Options: **Execute plan** / **Adjust plan** (let user provide feedback to refine)
+
+If the user says "Adjust", revise and re-propose. Only execute after approval.
+
+Once approved, create a task per search in the plan, then execute them — marking each in_progress/completed as you go. After all searches complete, synthesize the results.
 
 ## Mode selection — CRITICAL
 
