@@ -29,6 +29,26 @@ Based on the user's request, identify which area applies:
 
 **Read the matching supporting file** for specific commands and strategies, then execute the search.
 
+## Mode selection — CRITICAL
+
+**Avoid `-m research` unless truly necessary.** It is slow (up to 5 minutes), expensive, and often overkill.
+
+**Preferred approach:** Run multiple focused searches with `-m ask`, `-m search`, or `-m reason` from different angles, then synthesize the results yourself. This is faster, cheaper, and usually produces better answers than a single broad research query.
+
+**When `-m research` IS appropriate:**
+- Comprehensive literature reviews or state-of-the-art surveys
+- Questions requiring synthesis across many conflicting sources
+- Deep technical analysis where surface-level results are insufficient
+- The user explicitly needs exhaustive coverage of a complex topic
+
+**When NOT to use `-m research`** (even if user says "research"):
+- Regular development questions → use `-m ask` or `-m reason`
+- Comparing two approaches → use `-m reason`
+- Finding docs or examples → use `-m ask`
+- Anything answerable in a few searches → combine multiple `-m ask`/`-m reason` calls
+
+**If you must use `-m research`**, run it in the background with `run_in_background: true` on the Bash tool, since it can take up to 5 minutes. Continue other work while waiting.
+
 ## Quick reference
 
 ```bash
@@ -36,7 +56,7 @@ Based on the user's request, identify which area applies:
 websearch "query"
 
 # Key flags
--m <mode>        # ask (default), search, reason, research
+-m <mode>        # ask (default), search, reason, research (AVOID - see above)
 -p <profile>     # general (default), github, nodejs, python
 --provider <p>   # perplexity (default), brave, github
 --include-sources # include citation URLs
