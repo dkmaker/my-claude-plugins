@@ -24,7 +24,8 @@ Based on the user's request, identify which area applies:
 | Patterns | Best practices, design patterns, architecture decisions, conventions | [patterns.md](patterns.md) |
 | Bootstrapping | Project templates, starter configs, initial setup, scaffolding | [bootstrap.md](bootstrap.md) |
 | Dependencies | Version conflicts, migrations, breaking changes, compatibility | [deps.md](deps.md) |
-| Exploration | GitHub repos, code search, finding implementations | [explore.md](explore.md) |
+| Code Examples | Find working code snippets, config examples, implementation samples | [examples.md](examples.md) |
+| Exploration | GitHub repos, finding libraries and implementations | [explore.md](explore.md) |
 | General | Everything else — news, facts, general questions | [search.md](search.md) |
 
 **Read the matching supporting file** for specific commands and strategies, then execute the search.

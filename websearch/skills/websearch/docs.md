@@ -26,3 +26,4 @@ websearch -p github "library-name"
 - Use `-p github` to find a library's repo and README
 - Default `-m ask` works well for straightforward "how to use X" questions
 - `--include-sources` when you need to cite documentation URLs
+- For working code snippets and usage examples, also see [examples.md](examples.md)

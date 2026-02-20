@@ -26,3 +26,4 @@ websearch -p python "python project setup pyproject.toml"
 - `-m reason` for "how to set up X" step-by-step guidance
 - `--gh-topic template` or `--gh-topic starter` for template repos
 - `--gh-pushed` to filter for recently maintained templates
+- For working config/setup examples, also see [examples.md](examples.md)
