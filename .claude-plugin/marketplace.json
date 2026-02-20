@@ -24,6 +24,13 @@
       "category": "productivity"
     },
     {
+      "name": "websearch",
+      "source": "./websearch",
+      "description": "Web search and developer research CLI — debugging, docs, patterns, bootstrapping, dependencies, GitHub exploration, and general search",
+      "keywords": ["search", "web-search", "research", "debugging", "documentation", "github", "development"],
+      "category": "productivity"
+    },
+    {
       "name": "playwright",
       "source": "./playwright",
       "description": "Browser automation and testing with Playwright via MCP server",
