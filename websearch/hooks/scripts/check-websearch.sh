@@ -131,12 +131,13 @@ if [ -n "$WEBSEARCH_BIN" ]; then
   HELP=$("$WEBSEARCH_BIN" 2>&1 | head -8)
   STATUS="
 🔍 websearch CLI ready${UPDATE_MSG}"
-  CONTEXT="# Websearch CLI Available
+  CONTEXT="# Websearch Plugin Active
 
-The \`websearch\` CLI is ready.
-Use /websearch for web search and developer research.
+The websearch CLI is installed and managed automatically by this plugin.
 
-${HELP}"
+**IMPORTANT:** Do NOT call the \`websearch\` CLI directly. Always use the \`/websearch\` skill which wraps the CLI with proper mode selection, interview flows, and Context7 integration. The skill ensures searches are efficient, well-targeted, and avoid expensive operations.
+
+If the CLI needs troubleshooting or manual update, use \`/websearch\` — the skill includes installation and update guidance."
 else
   STATUS="WARNING: websearch CLI not found"
   CONTEXT="# Websearch CLI Not Found
