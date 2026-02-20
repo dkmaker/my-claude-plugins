@@ -1,6 +1,6 @@
 {
   "name": "websearch",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Web search and developer research using the websearch CLI and Context7 documentation. Covers debugging, documentation lookup, architecture patterns, project bootstrapping, dependency management, GitHub code exploration, and general web search.",
   "author": {
     "name": "Christian Pedersen",
