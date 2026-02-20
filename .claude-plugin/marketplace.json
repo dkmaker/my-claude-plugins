@@ -18,11 +18,11 @@
       "category": "knowledge"
     },
     {
-      "name": "perplexity",
-      "source": "./perplexity",
-      "description": "Real-time web search, reasoning, and research through Perplexity's API via MCP server",
-      "version": "0.5.0",
-      "keywords": ["mcp", "search", "web-search", "perplexity", "research", "reasoning", "ai"],
+      "name": "websearch",
+      "source": "./websearch",
+      "description": "Web search and developer research CLI — debugging, docs, patterns, bootstrapping, dependencies, GitHub exploration, and general search",
+      "version": "1.0.0",
+      "keywords": ["search", "web-search", "research", "debugging", "documentation", "github", "development"],
       "category": "productivity"
     },
     {
