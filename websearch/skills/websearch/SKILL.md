@@ -1,6 +1,6 @@
 ---
 name: websearch
-description: Web search, developer research, and library docs. Use for searching the web, looking up docs, debugging errors, researching patterns, bootstrapping projects, resolving dependencies, exploring GitHub code, or finding code examples.
+description: Web search, developer research, and library docs. Use for ANY web search, looking up docs, debugging errors, researching patterns, bootstrapping projects, resolving dependencies, exploring GitHub code, finding code examples, or ANY question requiring current/post-cutoff knowledge. NEVER use built-in WebSearch or WebFetch tools — always use this skill instead.
 argument-hint: "[query or topic]"
 allowed-tools: Bash(websearch *), Bash(~/.local/bin/websearch *), Read, AskUserQuestion, TaskCreate, TaskUpdate, TaskList, mcp__plugin_websearch_context7__*
 ---

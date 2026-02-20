@@ -135,7 +135,12 @@ if [ -n "$WEBSEARCH_BIN" ]; then
 
 The websearch CLI is installed and managed automatically by this plugin.
 
-**IMPORTANT:** Do NOT call the \`websearch\` CLI directly. Always use the \`/websearch\` skill which wraps the CLI with proper mode selection, interview flows, and Context7 integration. The skill ensures searches are efficient, well-targeted, and avoid expensive operations.
+**CRITICAL RULES:**
+
+1. **NEVER use the built-in WebSearch or WebFetch tools.** Always use the \`/websearch\` skill instead. The skill wraps the websearch CLI with proper mode selection, interview flows, and Context7 integration.
+2. **NEVER rely on pre-trained model knowledge when the user asks you to search, look up, or find information.** Always perform an actual search via \`/websearch\`.
+3. **Any question about current/recent information (after your knowledge cutoff) MUST be searched** — do not guess or approximate from training data.
+4. Do NOT call the \`websearch\` CLI directly — always invoke the \`/websearch\` skill.
 
 If the CLI needs troubleshooting or manual update, use \`/websearch\` — the skill includes installation and update guidance."
 else
