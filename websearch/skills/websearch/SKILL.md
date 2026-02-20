@@ -6,7 +6,7 @@ description: >
   researching best practices and design patterns, finding project templates and
   setup guides, resolving dependency conflicts, or exploring GitHub repositories
   and code. Handles both general web queries and development-specific research.
-allowed-tools: Bash(websearch *), Bash(~/code/dkmaker/websearch-cli/websearch *), Read
+allowed-tools: Bash(websearch *), Bash(~/.local/bin/websearch *), Read
 ---
 
 # Websearch — Web Search & Developer Research
@@ -34,7 +34,6 @@ Based on the user's request, identify which area applies:
 ```bash
 # The websearch binary (use whichever is available)
 websearch "query"
-~/code/dkmaker/websearch-cli/websearch "query"
 
 # Key flags
 -m <mode>        # ask (default), search, reason, research
