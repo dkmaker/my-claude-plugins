@@ -6,9 +6,6 @@
 # Quick answer (default mode: ask)
 websearch "your question here"
 
-# Deep research (slower, more thorough)
-websearch -m research "complex topic"
-
 # Reasoning with chain-of-thought
 websearch -m reason "question requiring analysis"
 
@@ -23,7 +20,7 @@ websearch --provider brave "query"
 
 - `-m ask` (default) for quick factual questions
 - `-m reason` when the answer requires analysis or comparison
-- `-m research` for comprehensive deep-dive topics (slow, 30s+)
 - `-m search` when you need URLs/links rather than synthesized answers
+- Prefer multiple `-m ask`/`-m reason` calls over `-m research` (see SKILL.md)
 - `--include-sources` when citations matter
 - `--no-cache` for time-sensitive queries
