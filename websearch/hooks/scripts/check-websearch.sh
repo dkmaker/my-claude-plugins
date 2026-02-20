@@ -129,7 +129,8 @@ fi
 
 if [ -n "$WEBSEARCH_BIN" ]; then
   HELP=$("$WEBSEARCH_BIN" 2>&1 | head -8)
-  STATUS="\n🔍 websearch CLI ready${UPDATE_MSG}"
+  STATUS="
+🔍 websearch CLI ready${UPDATE_MSG}"
   CONTEXT="# Websearch CLI Available
 
 The \`websearch\` CLI is ready.
@@ -145,12 +146,13 @@ Check that \`gh\` CLI is available and you have access to ${REPO}.
 The /websearch skill will not work without it."
 fi
 
-cat <<EOF
-{
-  "hookSpecificOutput": {
-    "hookEventName": "SessionStart",
-    "additionalContext": $(printf '%s' "$CONTEXT" | jq -Rs .)
-  },
-  "systemMessage": $(printf '%s' "$STATUS" | jq -Rs .)
-}
-EOF
+jq -n \
+  --arg context "$CONTEXT" \
+  --arg sysmsg "$STATUS" \
+  '{
+    hookSpecificOutput: {
+      hookEventName: "SessionStart",
+      additionalContext: $context
+    },
+    systemMessage: $sysmsg
+  }'
