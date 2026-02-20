@@ -129,7 +129,7 @@ fi
 
 if [ -n "$WEBSEARCH_BIN" ]; then
   HELP=$("$WEBSEARCH_BIN" 2>&1 | head -8)
-  STATUS="websearch CLI ready${UPDATE_MSG}"
+  STATUS="\n🔍 websearch CLI ready${UPDATE_MSG}"
   CONTEXT="# Websearch CLI Available
 
 The \`websearch\` CLI is ready.
