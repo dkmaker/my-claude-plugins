@@ -1,12 +1,8 @@
 ---
 name: websearch
-description: >
-  Web search and developer research. Use for ANY of these:
-  searching the web, looking up documentation, debugging errors/crashes/issues,
-  researching best practices and design patterns, finding project templates and
-  setup guides, resolving dependency conflicts, or exploring GitHub repositories
-  and code. Handles both general web queries and development-specific research.
-allowed-tools: Bash(websearch *), Bash(~/.local/bin/websearch *), Read, AskUserQuestion, TaskCreate, TaskUpdate, TaskList
+description: Web search, developer research, and library docs. Use for searching the web, looking up docs, debugging errors, researching patterns, bootstrapping projects, resolving dependencies, exploring GitHub code, or finding code examples.
+argument-hint: "[query or topic]"
+allowed-tools: Bash(websearch *), Bash(~/.local/bin/websearch *), Read, AskUserQuestion, TaskCreate, TaskUpdate, TaskList, mcp__context7__*
 ---
 
 # Websearch — Web Search & Developer Research
