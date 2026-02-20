@@ -6,7 +6,7 @@ description: >
   researching best practices and design patterns, finding project templates and
   setup guides, resolving dependency conflicts, or exploring GitHub repositories
   and code. Handles both general web queries and development-specific research.
-allowed-tools: Bash(websearch *), Bash(~/.local/bin/websearch *), Read
+allowed-tools: Bash(websearch *), Bash(~/.local/bin/websearch *), Read, AskUserQuestion
 ---
 
 # Websearch — Web Search & Developer Research
@@ -28,6 +28,37 @@ Based on the user's request, identify which area applies:
 | General | Everything else — news, facts, general questions | [search.md](search.md) |
 
 **Read the matching supporting file** for specific commands and strategies, then execute the search.
+
+## Complexity check — before searching
+
+Before executing searches, assess the request complexity:
+
+**Simple** (just search): Single question, clear scope, one area → search immediately.
+
+**Complex** (offer interview): Any of these signals:
+- Multi-faceted topic spanning several areas
+- Vague or broad request ("research X", "tell me about Y")
+- Architecture/design decisions with many variables
+- User explicitly asks for an interview or deep dive
+- The topic would benefit from `-m research` mode
+
+When complexity is detected, **offer the user a choice** using AskUserQuestion:
+
+> "This looks like a complex topic. Want me to interview you first to nail down exactly what to search for?"
+
+Options: **Quick search** (proceed immediately) / **Interview first** (refine the scope)
+
+### Interview process (if chosen or requested directly)
+
+Go 2-3 levels deep to expand the topic. Use AskUserQuestion for each level:
+
+**Level 1 — Scope:** What specific aspects matter? What's the context? (e.g., "Which parts of auth are you exploring — session management, OAuth providers, or token strategy?")
+
+**Level 2 — Constraints:** What tech stack, scale, or requirements apply? What have you already tried or ruled out? (e.g., "Are you using a specific framework? Any requirements around SSO or multi-tenancy?")
+
+**Level 3 (if needed) — Priorities:** What matters most — performance, simplicity, security? Any dealbreakers? (e.g., "Is minimizing third-party dependencies a priority, or is a managed service fine?")
+
+After the interview, build a **search plan**: a list of 3-6 focused searches from different angles using `-m ask`/`-m reason`/`-p github`, covering all dimensions uncovered. Present the plan briefly, then execute.
 
 ## Mode selection — CRITICAL
 
