@@ -27,6 +27,7 @@ Based on the user's request, identify which area applies:
 | Code Examples | Find working code snippets, config examples, implementation samples | [examples.md](examples.md) |
 | Exploration | GitHub repos, finding libraries and implementations | [explore.md](explore.md) |
 | General | Everything else — news, facts, general questions | [search.md](search.md) |
+| CLI Setup | Install, update, or troubleshoot the websearch CLI | [cli-setup.md](cli-setup.md) |
 
 **Read the matching supporting file** for specific commands and strategies, then execute the search.
 
